@@ -117,6 +117,7 @@ for e in range(args.events):
 		# Calculating all properties for this particle in the event
 		theta = samples['theta'][s]
 		phi = samples['phi'][s]
+		dt = samples['dt'][s]
 		# Calculating momentum vector
 		if 'pt' in configs:
 			pt = samples['pt'][s]
@@ -142,6 +143,7 @@ for e in range(args.events):
 		mcp.setPDG(pdg)
 		mcp.setMomentum(momentum)
 		mcp.setVertex(vtx)
+		mcp.setTime(dt)
 		# Adding particle to the event
 		col.addElement(mcp)
 		n_particles += 1
