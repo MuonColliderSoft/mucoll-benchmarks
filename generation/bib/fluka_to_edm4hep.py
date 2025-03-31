@@ -190,7 +190,11 @@ for iF, file_in in enumerate(args.files_in):
 				si = math.sin(dPhi)
 				pos.x = co * x - si * y
 				pos.y = si * x + co * y
-				mom.x = co * mom.x - si * mwriter.finish()
+				mom.x = co * mom.x - si * mom.y
+				mom.y = si * mom.x + co * mom.y
+				particle.setVertex(pos)
+				particle.setMomentum(mom)
+                                
 	if nEventFiles >= args.files_event or iF+1 == len(args.files_in):
 		nEvents +=1
 		nEventFiles = 0
