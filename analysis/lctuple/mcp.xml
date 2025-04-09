@@ -53,6 +53,10 @@
     <!--LCTuple creates a ROOT TTRee with a column wise ntuple from LCIO collections ....-->
     <!--Name of the MCParticle collection-->
     <parameter name="MCParticleCollection" type="string" lcioInType="MCParticle">MCParticle </parameter>
+    <!--Name of the JetCollection collection-->
+    <parameter name="JetCollection" type="string"></parameter>
+    <!--Name of the TrackCollection collection-->
+    <parameter name="TrackCollection" type="string"></parameter>
     <!--verbosity level of this processor ("DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT")-->
     <parameter name="Verbosity" type="string">MESSAGE </parameter>
   </processor>
