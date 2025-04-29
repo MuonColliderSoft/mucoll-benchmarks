@@ -58,14 +58,7 @@ line_dt=np.dtype([
 	('time', np.float64),
 	('x_mu', np.float64),
 	('y_mu', np.float64),
-	('z_mu', np.float64),
-	('x_mo', np.float64),
-	('y_mo', np.float64),
-	('z_mo', np.float64),
-	('px_mo', np.float64),
-	('py_mo', np.float64),
-	('pz_mo', np.float64),
-	('age_mo', np.float64)
+	('z_mu', np.float64)
 ])
 
 ######################################## Start of the processing
@@ -103,11 +96,12 @@ nLines = 0
 nEvents = 0
 col = None
 evt = None
+nPar = 0
 
 # Reading the complete files
 for iF, file_in in enumerate(args.files_in):
 	if args.max_lines and nLines >= args.max_lines:
-			break
+		break
 	# Creating the LCIO event and collection
 	if nEventFiles == 0:
 		col = IMPL.LCCollectionVec(EVENT.LCIO.MCPARTICLE)
@@ -136,6 +130,7 @@ for iF, file_in in enumerate(args.files_in):
 			print(f'WARNING: Unknown PDG ID for FLUKA ID: {fid}')
 			continue
 
+		nPar += 1
 		# Converting the absolute time of the particle [s -> ns]
 		t = time * 1e9
 
@@ -143,7 +138,6 @@ for iF, file_in in enumerate(args.files_in):
 		x = x * 10
 		y = y * 10
 		z = z * 10
-
 		# Skipping if particle's time is greater than allowed
 		if args.t_max is not None and t > args.t_max:
 			continue
@@ -211,4 +205,5 @@ for iF, file_in in enumerate(args.files_in):
 		print(f'Wrote event: {nEvents:d} with {col.getNumberOfElements()} particles')
 
 print(f'Wrote {nEvents:d} events to file: {args.file_out:s}')
+print(f'Number of lines in input file: {nLines}, number of particles with valid FLUKA ID to PDG ID: {nPar}')
 wrt.close()
