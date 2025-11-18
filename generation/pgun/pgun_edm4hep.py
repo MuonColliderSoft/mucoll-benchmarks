@@ -25,7 +25,7 @@ parser.add_argument('--d0', metavar='V', type=float, nargs='*', default=0,  help
 parser.add_argument('--pt', metavar='V', type=float, nargs='*',  help='Tranverse momentum [GeV]')
 parser.add_argument('--p', metavar='V', type=float, nargs='*',  help='Total momentum [GeV]')
 parser.add_argument('--theta', metavar='A', type=float, default=90, nargs='+',  help='Polar angle [deg]')
-parser.add_argument('--phi', metavar='A', type=float, default=90, nargs='+',  help='Azimuthal angle [deg]')
+parser.add_argument('--phi', metavar='A', type=float, default=[0, 360], nargs='+',  help='Azimuthal angle [deg]')
 
 args = parser.parse_args()
 
