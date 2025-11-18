@@ -25,6 +25,7 @@ parser.add_argument('--d0', metavar='V', type=float, nargs='*', default=0,  help
 parser.add_argument('--pt', metavar='V', type=float, nargs='*',  help='Tranverse momentum [GeV]')
 parser.add_argument('--p', metavar='V', type=float, nargs='*',  help='Total momentum [GeV]')
 parser.add_argument('--theta', metavar='A', type=float, default=90, nargs='+',  help='Polar angle [deg]')
+parser.add_argument('--phi', metavar='A', type=float, default=90, nargs='+',  help='Azimuthal angle [deg]')
 
 args = parser.parse_args()
 
@@ -56,7 +57,8 @@ configs = {
 	'dt': args.dt,
 	'dz': args.dz,
 	'd0': args.d0,
-	'theta': args.theta
+	'theta': args.theta,
+	'phi': args.phi
 }
 if args.pt is not None:
 	configs['pt'] = args.pt
@@ -112,8 +114,8 @@ for e in range(args.events):
 			pdg_idx = np.random.choice(n_pdgs, 1)[0]
 		pdg = args.pdg[pdg_idx]
 		# Calculating all properties for this particle in the event
-		phi = rng.random() * math.pi * 2.
-		theta = samples['theta'][e]
+		phi = math.radians(samples['phi'][e])
+		theta = math.radians(samples['theta'][e])
 		# Calculating momentum vector
 		if 'pt' in configs:
 			pt = samples['pt'][e]
