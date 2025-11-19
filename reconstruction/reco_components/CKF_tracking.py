@@ -1,7 +1,7 @@
 from GaudiKernel.Constants import INFO, WARNING, DEBUG
 from Configurables import ACTSSeededCKFTrackingAlg, ACTSDuplicateRemoval, FilterTracksAlg, TrackTruthAlg, RefitFinal
 
-def new_CKFTracker(DetectorSchema, MatFile, TGeoFile, TGeoDescFile):
+def CKFTracker_cfg(DetectorSchema, MatFile, TGeoFile, TGeoDescFile):
     """
     Create a new ACTSSeededCKFTrackingAlg instance for CKF tracking.
     """
@@ -58,7 +58,7 @@ def new_CKFTracker(DetectorSchema, MatFile, TGeoFile, TGeoDescFile):
             OutputLevel = INFO
         )
 
-def new_deduper():
+def deduper_cfg():
     """
     Create a new ACTSDuplicateRemoval instance for removing duplicate tracks.
     """
@@ -70,7 +70,7 @@ def new_deduper():
     )
 
 
-def new_track_filter():
+def track_filter_cfg():
     """
     Create a new FilterTracksAlg instance for filtering tracks.
     """
@@ -88,7 +88,7 @@ def new_track_filter():
         OutputLevel = INFO
     )
 
-def new_track_truth():
+def track_truth_cfg():
     """
     Create a new TrackTruth instance for track truth matching.
     """
@@ -100,7 +100,7 @@ def new_track_truth():
         OutputLevel = INFO
     )
 
-def new_track_refitter():
+def track_refitter_cfg():
     """
     Create a new TrackRefitter instance for refitting tracks.
     """

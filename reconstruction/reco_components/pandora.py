@@ -1,7 +1,7 @@
 from GaudiKernel.Constants import INFO, WARNING, DEBUG
 from Configurables import DDPandoraPFANewAlgorithm #, FastJetAlg
 
-def new_pandoraPFA():
+def pandoraPFA_cfg():
     """
     Create a new DDPandoraPFANewAlgorithm instance for Pandora PFA.
     """
@@ -106,7 +106,7 @@ def new_pandoraPFA():
         OutputLevel = INFO
     )
 '''
-def new_fastJet():
+def fastJet_cfg():
     return FastJetAlg("AntiKt FastJet",
         algorithm = ["antikt_algorithm", "0.4"],
         clusteringMode = ["Inclusive", "5"],

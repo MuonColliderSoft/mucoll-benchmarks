@@ -1,7 +1,7 @@
 from GaudiKernel.Constants import INFO, WARNING
 from Configurables import OverlayTimingRandomMix
 
-def new_overlay_full(args):
+def overlay_full_cfg(args):
     """
     Create a new overlay instance with the given parameters.
     """

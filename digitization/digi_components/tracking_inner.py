@@ -1,7 +1,7 @@
 from GaudiKernel.Constants import INFO, WARNING
 from Configurables import DDPlanarDigi
 
-def new_ITBarrel(args):
+def ITBarrel_cfg(args):
     """
     Create a new inner barrel digitiser instance with the given parameters.
     """
@@ -26,7 +26,7 @@ def new_ITBarrel(args):
         OutputLevel = INFO
     )
 
-def new_ITEndcap(args):
+def ITEndcap_cfg(args):
     """
     Create a new inner endcap digitiser instance with the given parameters.
     """

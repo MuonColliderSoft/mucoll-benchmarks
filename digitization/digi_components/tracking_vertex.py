@@ -1,7 +1,7 @@
 from GaudiKernel.Constants import INFO, WARNING
 from Configurables import DDPlanarDigi
 
-def new_VXDBarrel(args):
+def VXDBarrel_cfg(args):
     """
     Create a new vertex barrel instance with the given parameters.
     """
@@ -26,7 +26,7 @@ def new_VXDBarrel(args):
         OutputLevel = INFO
     )
 
-def new_VXDEndcap(args):
+def VXDEndcap_cfg(args):
     """
     Create a new vertex endcap instance with the given parameters.
     """

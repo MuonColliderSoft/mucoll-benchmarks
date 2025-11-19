@@ -1,7 +1,7 @@
 from GaudiKernel.Constants import INFO, WARNING
 from Configurables import DDMuonDigiSimple
 
-def new_MuonBarrelDigi(args):
+def MuonBarrelDigi_cfg(args):
     """
     Create a new Muon Barrel digitiser instance with the given parameters.
     """
@@ -22,7 +22,7 @@ def new_MuonBarrelDigi(args):
     )
 
 
-def new_MuonEndcapDigi(args):
+def MuonEndcapDigi_cfg(args):
     """
     Create a new Muon Endcap digitiser instance with the given parameters.
     """

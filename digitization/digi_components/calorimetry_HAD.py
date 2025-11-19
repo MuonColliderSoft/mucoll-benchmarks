@@ -1,7 +1,7 @@
 from GaudiKernel.Constants import INFO, WARNING
 from Configurables import RealisticCaloDigiScinPpd, RealisticCaloRecoScinPpd
 
-def new_HCalBarrelDigi(args):
+def HCalBarrelDigi_cfg(args):
     """
     Create a new HCal barrel digitiser instance with the given parameters.
     """
@@ -30,7 +30,7 @@ def new_HCalBarrelDigi(args):
         OutputLevel = INFO
     )
 
-def new_HCalBarrelReco():
+def HCalBarrelReco_cfg():
     """
     Create a new HCal barrel reco instance with the given parameters.
     """
@@ -46,7 +46,7 @@ def new_HCalBarrelReco():
         OutputLevel = INFO
     )
 
-def new_HCalEndcapDigi(args):
+def HCalEndcapDigi_cfg(args):
     """
     Create a new HCal endcap digitiser instance with the given parameters.
     """
@@ -75,7 +75,7 @@ def new_HCalEndcapDigi(args):
         OutputLevel = INFO
     )
 
-def new_HCalEndcapReco():
+def HCalEndcapReco_cfg():
     """
     Create a new HCal endcap reco instance with the given parameters.
     """
@@ -91,7 +91,7 @@ def new_HCalEndcapReco():
         OutputLevel = INFO
     )
 
-def new_HCalRingDigi():
+def HCalRingDigi_cfg(args):
     """
     Create a new HCal ring digi instance with the given parameters.
     """
@@ -116,7 +116,7 @@ def new_HCalRingDigi():
         OutputLevel = INFO
     )
 
-def new_HCalRingReco():
+def HCalRingReco_cfg():
     """
     Create a new HCal ring reco instance with the given parameters.
     """

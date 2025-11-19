@@ -1,7 +1,7 @@
 from GaudiKernel.Constants import INFO, WARNING
 from Configurables import FilterDoubleLayerHits
 
-def new_filterDL_vertexBarrel():
+def filterDL_vertexBarrel_cfg():
     """
     Create a new filter for double layer hits in the vertex detector.
     """
@@ -15,7 +15,7 @@ def new_filterDL_vertexBarrel():
         OutputLevel = INFO
     )
 
-def new_filterDL_vertexEndcap():
+def filterDL_vertexEndcap_cfg():
     """
     Create a new filter for double layer hits in the vertex endcap.
     """

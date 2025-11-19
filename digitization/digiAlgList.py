@@ -7,47 +7,47 @@ def makeDigiAlgList(the_args):
     algList = []
     # BIB Overlay
     if the_args.doOverlayFull:
-        from digi_components.overlay_full import new_overlay_full
-        algList.append(new_overlay_full(the_args))
+        from digi_components.overlay_full import overlay_full_cfg
+        algList.append(overlay_full_cfg(the_args))
 
     # Tracker Digitization
-    from digi_components.tracking_vertex import new_VXDBarrel, new_VXDEndcap
-    from digi_components.tracking_inner import new_ITBarrel, new_ITEndcap
-    from digi_components.tracking_outer import new_OTBarrel, new_OTEndcap
-    algList.append(new_VXDBarrel(the_args))
-    algList.append(new_VXDEndcap(the_args))
-    algList.append(new_ITBarrel(the_args))
-    algList.append(new_ITEndcap(the_args))
-    algList.append(new_OTBarrel(the_args))
-    algList.append(new_OTEndcap(the_args))
+    from digi_components.tracking_vertex import VXDBarrel_cfg, VXDEndcap_cfg
+    from digi_components.tracking_inner import ITBarrel_cfg, ITEndcap_cfg
+    from digi_components.tracking_outer import OTBarrel_cfg, OTEndcap_cfg
+    algList.append(VXDBarrel_cfg(the_args))
+    algList.append(VXDEndcap_cfg(the_args))
+    algList.append(ITBarrel_cfg(the_args))
+    algList.append(ITEndcap_cfg(the_args))
+    algList.append(OTBarrel_cfg(the_args))
+    algList.append(OTEndcap_cfg(the_args))
 
     # EM, Hadronic, Muon Calorimeter Digitization
-    from digi_components.calorimetry_EM import new_ECalBarrelDigi, new_ECalBarrelReco
-    from digi_components.calorimetry_EM import new_ECalPlugDigi, new_ECalPlugReco
-    from digi_components.calorimetry_EM import new_ECalEndcapDigi, new_ECalEndcapReco
-    algList.append(new_ECalBarrelDigi(the_args))
-    algList.append(new_ECalBarrelReco())
-    #algList.append(new_ECalPlugDigi(the_args))
-    #algList.append(new_ECalPlugReco())
-    algList.append(new_ECalEndcapDigi(the_args))
-    algList.append(new_ECalEndcapReco())
-    from digi_components.calorimetry_HAD import new_HCalBarrelDigi, new_HCalBarrelReco
-    from digi_components.calorimetry_HAD import new_HCalEndcapDigi, new_HCalEndcapReco
-    from digi_components.calorimetry_HAD import new_HCalRingDigi, new_HCalRingReco
-    algList.append(new_HCalBarrelDigi(the_args))
-    algList.append(new_HCalBarrelReco())
-    algList.append(new_HCalEndcapDigi(the_args))
-    algList.append(new_HCalEndcapReco())
-    #algList.append(new_HCalRingDigi(the_args))
-    #algList.append(new_HCalRingReco())
-    from digi_components.calorimetry_MU import new_MuonBarrelDigi, new_MuonEndcapDigi
-    algList.append(new_MuonBarrelDigi(the_args))
-    algList.append(new_MuonEndcapDigi(the_args))
+    from digi_components.calorimetry_EM import ECalBarrelDigi_cfg, ECalBarrelReco_cfg
+    from digi_components.calorimetry_EM import ECalPlugDigi_cfg, ECalPlugReco_cfg
+    from digi_components.calorimetry_EM import ECalEndcapDigi_cfg, ECalEndcapReco_cfg
+    algList.append(ECalBarrelDigi_cfg(the_args))
+    algList.append(ECalBarrelReco_cfg())
+    #algList.append(ECalPlugDigi_cfg(the_args))
+    #algList.append(ECalPlugReco_cfg())
+    algList.append(ECalEndcapDigi_cfg(the_args))
+    algList.append(ECalEndcapReco_cfg())
+    from digi_components.calorimetry_HAD import HCalBarrelDigi_cfg, HCalBarrelReco_cfg
+    from digi_components.calorimetry_HAD import HCalEndcapDigi_cfg, HCalEndcapReco_cfg
+    from digi_components.calorimetry_HAD import HCalRingDigi_cfg, HCalRingReco_cfg
+    algList.append(HCalBarrelDigi_cfg(the_args))
+    algList.append(HCalBarrelReco_cfg())
+    algList.append(HCalEndcapDigi_cfg(the_args))
+    algList.append(HCalEndcapReco_cfg())
+    #algList.append(HCalRingDigi_cfg(the_args))
+    #algList.append(HCalRingReco_cfg())
+    from digi_components.calorimetry_MU import MuonBarrelDigi_cfg, MuonEndcapDigi_cfg
+    algList.append(MuonBarrelDigi_cfg(the_args))
+    algList.append(MuonEndcapDigi_cfg(the_args))
 
     # Vertex Filtering
     if the_args.doFilterDL:
-        from digi_components.filterDL_vertex import new_filterDL_vertexBarrel, new_filterDL_vertexEndcap
-        algList.append(new_filterDL_vertexBarrel())
-        algList.append(new_filterDL_vertexEndcap())
+        from digi_components.filterDL_vertex import filterDL_vertexBarrel_cfg, filterDL_vertexEndcap_cfg
+        algList.append(filterDL_vertexBarrel_cfg())
+        algList.append(filterDL_vertexEndcap_cfg())
 
     return algList

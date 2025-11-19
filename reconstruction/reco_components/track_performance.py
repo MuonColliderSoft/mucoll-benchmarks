@@ -1,7 +1,7 @@
 from GaudiKernel.Constants import INFO, WARNING, DEBUG
 from Configurables import TrackTruthAlg, TrackPerfHistAlg
 
-def new_trackTruth():
+def trackTruth_cfg():
     """
     Create a new TrackTruthAlg instance for associating tracks with MC particles.
     """
@@ -13,7 +13,7 @@ def new_trackTruth():
         OutputLevel = INFO
     )
 
-def new_trackPerf():
+def trackPerf_cfg():
     """
     Create a new TrackPerfHistAlg instance for analyzing track performance.
     """

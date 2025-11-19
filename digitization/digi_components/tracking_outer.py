@@ -1,7 +1,7 @@
 from GaudiKernel.Constants import INFO, WARNING
 from Configurables import DDPlanarDigi
 
-def new_OTBarrel(args):
+def OTBarrel_cfg(args):
     """
     Create a new outer barrel digitiser instance with the given parameters.
     """
@@ -26,7 +26,7 @@ def new_OTBarrel(args):
         OutputLevel = INFO
     )
 
-def new_OTEndcap(args):
+def OTEndcap_cfg(args):
     """
     Create a new outer endcap digitiser instance with the given parameters.
     """

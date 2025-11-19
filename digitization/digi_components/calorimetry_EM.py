@@ -1,7 +1,7 @@
 from GaudiKernel.Constants import INFO, WARNING
 from Configurables import RealisticCaloDigiSilicon, RealisticCaloRecoSilicon
 
-def new_ECalBarrelDigi(args):
+def ECalBarrelDigi_cfg(args):
     """
     Create a new ECal barrel digitiser instance with the given parameters.
     """
@@ -27,7 +27,7 @@ def new_ECalBarrelDigi(args):
         OutputLevel = INFO
     )
 
-def new_ECalBarrelReco():
+def ECalBarrelReco_cfg():
     """
     Create a new ECal barrel reco instance with the given parameters.
     """
@@ -41,7 +41,7 @@ def new_ECalBarrelReco():
         OutputLevel = INFO
     )
 
-def new_ECalPlugDigi(args):
+def ECalPlugDigi_cfg(args):
     """
     Create a new ECal plug digitiser instance with the given parameters.
     """
@@ -67,7 +67,7 @@ def new_ECalPlugDigi(args):
         OutputLevel = INFO
     )
 
-def new_ECalPlugReco():
+def ECalPlugReco_cfg():
     """
     Create a new ECal plug reco instance with the given parameters.
     """
@@ -81,7 +81,7 @@ def new_ECalPlugReco():
         OutputLevel = INFO
     )
 
-def new_ECalEndcapDigi(args):
+def ECalEndcapDigi_cfg(args):
     """
     Create a new ECal endcap digitiser instance with the given parameters.
     """
@@ -107,7 +107,7 @@ def new_ECalEndcapDigi(args):
         OutputLevel = INFO
     )
 
-def new_ECalEndcapReco():
+def ECalEndcapReco_cfg():
     """
     Create a new ECal endcap reco instance with the given parameters.
     """

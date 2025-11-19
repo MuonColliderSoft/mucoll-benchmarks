@@ -1,7 +1,7 @@
 from GaudiKernel.Constants import INFO, WARNING, DEBUG
 from Configurables import CollectionMerger
 
-def new_mergehits():
+def mergehits_cfg():
     """
     Create a new CollectionMerger instance for merging hits.
     """
@@ -12,7 +12,7 @@ def new_mergehits():
         OutputLevel = INFO
     )
 
-def new_mergehitsrelations():
+def mergehitsrelations_cfg():
     """
     Create a new CollectionMerger instance for merging hits relations.
     """
