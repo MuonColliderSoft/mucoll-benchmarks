@@ -5,28 +5,58 @@ def new_CKFTracker(DetectorSchema, MatFile, TGeoFile, TGeoDescFile):
     """
     Create a new ACTSSeededCKFTrackingAlg instance for CKF tracking.
     """
-    return ACTSSeededCKFTrackingAlg(
-        "Reconstructor",
-        MatFile = MatFile,
-        TGeoFile = TGeoFile,
-        TGeoDescFile = TGeoDescFile,
-        DetectorSchema = DetectorSchema,
-        RunCKF = "True",
-        CKF_Chi2CutOff = 10,
-        SeedFinding_RMax = 150,
-        SeedFinding_MinPt = 500,
-        SeedFinding_DeltaRMin = 2,
-        SeedFinding_DeltaRMax = 60,
-        CKF_NumMeasurementsCutOff = 1,
-        SeedFinding_SigmaScattering = 3,
-        SeedFinding_CollisionRegion = 3.5,
-        SeedFinding_RadLengthPerSeed = 0.1,
-        SeedingLayers = ["13", "2", "13", "6", "13", "10", "13", "14", "14", "2", "14", "6", "14", "10", "14", "14", "15", "2", "15", "6", "15", "10", "15", "14"],
-        OutputTrackCollectionName = ["AllTracks"],
-        OutputSeedCollectionName = ["SeedTracks"],
-        InputTrackerHitCollectionName = ["MergedTrackerHits"],
-        OutputLevel = INFO
-    )
+    if DetectorSchema == "MAIA_v0":
+        return ACTSSeededCKFTrackingAlg(
+            "Reconstructor",
+            MatFile = MatFile,
+            TGeoFile = TGeoFile,
+            TGeoDescFile = TGeoDescFile,
+            DetectorSchema = DetectorSchema,
+            RunCKF = "True",
+            CKF_Chi2CutOff = 10,
+            SeedFinding_RMax = 150,
+            SeedFinding_MinPt = 500,
+            SeedFinding_ImpactMax = 3,
+            CKF_NumMeasurementsCutOff = 1,
+            SeedFinding_SigmaScattering = 50,
+            SeedFinding_CollisionRegion = 6,
+            SeedFinding_RadLengthPerSeed = 0.1,
+            SeedingLayers = [
+                "13", "2", "13", "6", "13", "10", "13", "14",
+                "14", "2", "14", "6", "14", "10", "14", "14",
+                "15", "2", "15", "6", "15", "10", "15", "14",
+                "8", "2", "17", "2", "18", "2"],
+            OutputTrackCollectionName = ["AllTracks"],
+            OutputSeedCollectionName = ["SeedTracks"],
+            InputTrackerHitCollectionName = ["MergedTrackerHits"],
+            OutputLevel = INFO
+        )
+    else:
+        return ACTSSeededCKFTrackingAlg(
+            "Reconstructor",
+            MatFile = MatFile,
+            TGeoFile = TGeoFile,
+            TGeoDescFile = TGeoDescFile,
+            DetectorSchema = DetectorSchema,
+            RunCKF = "True",
+            CKF_Chi2CutOff = 10,
+            SeedFinding_RMax = 150,
+            SeedFinding_MinPt = 500,
+            SeedFinding_DeltaRMin = 2,
+            SeedFinding_DeltaRMax = 60,
+            CKF_NumMeasurementsCutOff = 1,
+            SeedFinding_SigmaScattering = 3,
+            SeedFinding_CollisionRegion = 3.5,
+            SeedFinding_RadLengthPerSeed = 0.1,
+            SeedingLayers = [
+                "13", "2", "13", "6", "13", "10", "13", "14",
+                "14", "2", "14", "6", "14", "10", "14", "14",
+                "15", "2", "15", "6", "15", "10", "15", "14"],
+            OutputTrackCollectionName = ["AllTracks"],
+            OutputSeedCollectionName = ["SeedTracks"],
+            InputTrackerHitCollectionName = ["MergedTrackerHits"],
+            OutputLevel = INFO
+        )
 
 def new_deduper():
     """
