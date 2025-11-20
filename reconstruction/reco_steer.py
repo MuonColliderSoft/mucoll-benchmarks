@@ -6,13 +6,7 @@ from GaudiKernel.Constants import INFO, WARNING, DEBUG
 from reco_components.reco_args import get_reco_args
 args = get_reco_args()
 
-# Set Up Services
-from muc_services import set_services
-services = list(set_services(args, "reco_histograms.root"))
-
-# Import the Algorithm List
-from recoAlgList import makeRecoAlgList
-algList = makeRecoAlgList(args)
+services = []
 
 # Set up Multi-Threading if enabled
 from muc_mt import get_mt_args, get_k4run_mt
@@ -22,6 +16,14 @@ if mt_args.useMT:
         mt_args.numThreads, mt_args.numThreads
     )
     services += [whiteboard]
+
+# Set Up Services
+from muc_services import set_services
+services += list(set_services(args, mt_args, "reco_histograms.root"))
+
+# Import the Algorithm List
+from recoAlgList import makeRecoAlgList
+algList = makeRecoAlgList(args)
 
 '''-------------------------------------------------------------'''
 '''   Run the Reconstruction Algorithms in the ApplicationMgr   '''

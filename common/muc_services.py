@@ -2,7 +2,7 @@ from Gaudi.Configuration import *
 from GaudiKernel.Constants import INFO, WARNING, DEBUG
 from Configurables import GeoSvc, EventDataSvc, THistSvc, UniqueIDGenSvc
 
-def set_services(the_args, histo_file):
+def set_services(the_args, mt_args, histo_file):
     """
     Set up the necessary services.
     
@@ -22,11 +22,13 @@ def set_services(the_args, histo_file):
         Seed = getattr(the_args, "RandSeed", 0)
     )
 
-    evtsvc = EventDataSvc("EventDataSvc")
-
     THistSvc().Output = [f"histos DATAFILE='{histo_file}' TYP='ROOT' OPT='RECREATE'"]
     THistSvc().PrintAll = True
     THistSvc().AutoSave = True
     THistSvc().AutoFlush = True
 
-    return [evtsvc, geoservice, id_service]
+    if mt_args.useMT:
+        return [geoservice, id_service]
+    else:
+        evtsvc = EventDataSvc("EventDataSvc")
+        return [evtsvc, geoservice, id_service]

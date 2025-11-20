@@ -32,11 +32,11 @@ def get_mt_args():
 def get_k4run_mt(threads, event_slots):
     """Create a k4run instance configured for multi-threading."""
     from Gaudi.Configuration import INFO, WARNING
-    from Configurables import HiveWhiteBoard, HiveSlimEventLoopMgr, AvalancheSchedulerSvc
+    from Configurables import HiveSlimEventLoopMgr, HiveWhiteBoard, AvalancheSchedulerSvc
 
     wb = HiveWhiteBoard(
-        "EventDataSvc", 
-    #    EventSlots = event_slots,
+        "EventDataSvc",
+        EventSlots=event_slots,
     )
     elm = HiveSlimEventLoopMgr(
         "HiveSlimEventLoopMgr",

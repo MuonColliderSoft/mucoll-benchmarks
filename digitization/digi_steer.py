@@ -6,13 +6,7 @@ from GaudiKernel.Constants import INFO, WARNING
 from digi_components.digi_args import get_digi_args
 args = get_digi_args()
 
-# Set Up Services
-from muc_services import set_services
-services = list(set_services(args, "digi_histograms.root"))
-
-# Import the Algorithm List
-from digiAlgList import makeDigiAlgList
-algList = makeDigiAlgList(args)
+services = []
 
 # Set up Multi-Threading if enabled
 from muc_mt import get_mt_args, get_k4run_mt
@@ -22,6 +16,14 @@ if mt_args.useMT:
         mt_args.numThreads, mt_args.numThreads
     )
     services += [whiteboard]
+
+# Set Up Services
+from muc_services import set_services
+services += list(set_services(args, mt_args, "digi_histograms.root"))
+
+# Import the Algorithm List
+from digiAlgList import makeDigiAlgList
+algList = makeDigiAlgList(args)
 
 '''-------------------------------------------------------------'''
 '''    Run the Digitization Algorithms in the ApplicationMgr    '''
