@@ -7,15 +7,24 @@ from reco_components.reco_args import get_reco_args
 args = get_reco_args()
 
 # Set Up Services
-from reco_components.reco_services import set_reco_services
-[evtsvc, geoservice] = set_reco_services(args)
+from muc_services import set_services
+services = list(set_services(args, "reco_histograms.root"))
 
 # Import the Algorithm List
 from recoAlgList import makeRecoAlgList
 algList = makeRecoAlgList(args)
 
+# Set up Multi-Threading if enabled
+from muc_mt import get_mt_args, get_k4run_mt
+mt_args = get_mt_args()
+if mt_args.useMT:
+    whiteboard, selm, sch = get_k4run_mt(
+        mt_args.numThreads, mt_args.numThreads
+    )
+    services += [whiteboard]
+
 '''-------------------------------------------------------------'''
-'''    Run the Digitization Algorithms in the ApplicationMgr    '''
+'''   Run the Reconstruction Algorithms in the ApplicationMgr   '''
 '''-------------------------------------------------------------'''
 # Declare Input and Output for the IOSvc
 from k4FWCore import IOSvc, ApplicationMgr
@@ -29,7 +38,8 @@ svc = IOSvc(
 ApplicationMgr(
     TopAlg = algList,
     EvtSel = 'NONE',
-    EvtMax   = 10,
-    ExtSvc = [evtsvc, geoservice],
-    OutputLevel=INFO
+    EvtMax = 10,
+    ExtSvc = services,
+    EventLoop = selm if mt_args.useMT else None,
+    OutputLevel = INFO,
 )

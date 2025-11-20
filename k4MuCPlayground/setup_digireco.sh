@@ -1,3 +1,4 @@
+box_width=46
 
 if [ $# -gt 2 ]; then
     echo "usage: $0 [mucoll-benchmarks] [Geometry Name]"
@@ -15,14 +16,22 @@ else
 fi
 
 if [ ! -d "${MYBUILD}/reconstruction" ]; then
-    echo "Steering File directory ${MYBUILD} does not exist"
-    echo "Please correctly provide its path to setup"
+    echo "   ╭──────────────────────────────────────────────╮"
+    echo "   │            Steering File Directory           │"
+    name_len=${#MYBUILD}
+    printf "   │%*s%s%*s│\n" "$pad" "" "$MYBUILD" "$((box_width - pad - name_len))" ""
+
+    echo "   │                does not exist                │"
+    echo "   │  Please correctly provide its path to setup  │"
+    echo "   ╰──────────────────────────────────────────────╯"
+    return 1
 else
     export PYTHONPATH="${MYBUILD}/digitization:$PYTHONPATH"
     export PYTHONPATH="${MYBUILD}/reconstruction:$PYTHONPATH"
+    export PYTHONPATH="${MYBUILD}/common:$PYTHONPATH"
+
 fi
 
-box_width=46
 # Set Environment variables for Geometry
 if [ $# -eq 2 ]; then
     GEOM_NAME="$2"

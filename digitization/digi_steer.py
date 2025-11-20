@@ -7,12 +7,21 @@ from digi_components.digi_args import get_digi_args
 args = get_digi_args()
 
 # Set Up Services
-from digi_components.digi_services import set_digi_services
-[evtsvc, geoservice, id_service] = set_digi_services(args)
+from muc_services import set_services
+services = list(set_services(args, "digi_histograms.root"))
 
 # Import the Algorithm List
 from digiAlgList import makeDigiAlgList
 algList = makeDigiAlgList(args)
+
+# Set up Multi-Threading if enabled
+from muc_mt import get_mt_args, get_k4run_mt
+mt_args = get_mt_args()
+if mt_args.useMT:
+    whiteboard, selm, sch = get_k4run_mt(
+        mt_args.numThreads, mt_args.numThreads
+    )
+    services += [whiteboard]
 
 '''-------------------------------------------------------------'''
 '''    Run the Digitization Algorithms in the ApplicationMgr    '''
@@ -30,6 +39,7 @@ ApplicationMgr(
     TopAlg = algList,
     EvtSel = 'NONE',
     EvtMax   = 10,
-    ExtSvc = [evtsvc, geoservice],
+    ExtSvc = services,
+    EventLoop = selm if mt_args.useMT else None,
     OutputLevel=INFO
 )
