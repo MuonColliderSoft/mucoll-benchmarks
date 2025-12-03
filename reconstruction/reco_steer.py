@@ -42,6 +42,7 @@ ApplicationMgr(
     EvtSel = 'NONE',
     EvtMax = 10,
     ExtSvc = services,
-    EventLoop = selm if mt_args.useMT else None,
-    OutputLevel = INFO,
+    OutputLevel = WARNING,
 )
+if mt_args.useMT:
+    ApplicationMgr().EventLoop = selm
