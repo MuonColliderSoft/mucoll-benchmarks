@@ -3,37 +3,38 @@ from re import VERBOSE
 from GaudiKernel.Constants import INFO, WARNING, DEBUG
 from Configurables import CKFTrackingAlg,ACTSSeededCKFTrackingAlg, ACTSDuplicateRemoval, FilterTracksAlg, TrackTruthAlg, RefitFinal
 
-def CKFTracker_cfg(DetectorSchema, MatFile, TGeoFile, TGeoDescFile):
+def CKFTracker_cfg(args):
     """
     Create a new ACTSSeededCKFTrackingAlg instance for CKF tracking.
     """
     if DetectorSchema == "MAIA_v0":
          return CKFTrackingAlg(
              "Reconstructor",
-            RunCKF=True,
-            CKF_Chi2CutOff=10,
-            SeedFinding_RMax=150,
-            SeedFinding_MinPt=500,
-            SeedFinding_ImpactMax=3,
-            CKF_NumMeasurementsCutOff=1,
-            SeedFinding_SigmaScattering=50,
-            SeedFinding_CollisionRegion=6,
-            SeedFinding_RadLengthPerSeed=0.1,
-            SeedingSensorsCellIDs=["system:1", "system:2,layer:1|2|3"],
-            OutputTrackCollection="AllTracks",
-            OutputSeedCollection="SeedTracks",
-            InputTrackerHitCollection="MergedTrackerHits",
-            InputTrackerHitRelationCollection="MergedTrackerHitsRelations",
-            NumThreads=4,
-            OutputLevel=INFO,
+            RunCKF = True,
+            CKF_Chi2CutOff = 10,
+            SeedFinding_RMax = 150,
+            SeedFinding_MinPt = 500,
+            SeedFinding_ImpactMax = 3,
+            CKF_NumMeasurementsCutOff = 1,
+            SeedFinding_SigmaScattering = 50,
+            SeedFinding_CollisionRegion = 6,
+            SeedFinding_RadLengthPerSeed = 0.1,
+            SeedingSensorsCellIDs = ["system:1", "system:2,layer:1|2|3"],
+            OutputTrackCollection = "AllTracks",
+            OutputSeedCollection = "SeedTracks",
+            InputTrackerHitCollection = "MergedTrackerHits",
+            InputTrackerHitRelationCollection = "MergedTrackerHitsRelations",
+            NumThreads = args.TrackingThreads,
+            OutputLevel = INFO,
         )
     else:
         return ACTSSeededCKFTrackingAlg(
             "Reconstructor",
-            MatFile = MatFile,
-            TGeoFile = TGeoFile,
-            TGeoDescFile = TGeoDescFile,
-            DetectorSchema = DetectorSchema,
+            MatFile = args.MatFile,
+            TGeoFile = args.TGeoFile,
+            TGeoDescFile = args.TGeoDescFile,
+            NumThreads = args.TrackingThreads,
+            DetectorSchema = args.DetectorSchema,
             RunCKF = "True",
             CKF_Chi2CutOff = 10,
             SeedFinding_RMax = 150,
@@ -84,12 +85,13 @@ def track_filter_cfg():
         OutputLevel = INFO
     )
 
-def track_truth_cfg():
+def track_truth_cfg(args):
     """
     Create a new TrackTruth instance for track truth matching.
     """
     return TrackTruthAlg(
         "TruthMatcher",
+        NumThreads = args.TrackingThreads,
         InputTrackCollectionName = ["SiTracks"],
         InputTrackerHit2SimTrackerHitRelationName = ["MergedTrackerHitsRelations"],
         OutputParticle2TrackRelationName = ["SiTrackRelations"],
