@@ -48,4 +48,11 @@ def get_reco_args():
         default=False
     )
 
+    parser.add_argument(
+        "--TrackingThreads",
+        help="Number of threads for tracking",
+        type=int,
+        default=1,
+    )
+
     return parser.parse_known_args()[0]
