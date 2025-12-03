@@ -12,14 +12,10 @@ def makeRecoAlgList(the_args):
 
     # CKF Tracking
     from reco_components.CKF_tracking import CKFTracker_cfg, deduper_cfg, track_filter_cfg, track_truth_cfg, track_refitter_cfg
-    algList.append(CKFTracker_cfg(
-        the_args.DetectorSchema,
-        the_args.MatFile,
-        the_args.TGeoFile,
-        the_args.TGeoDescFile))
+    algList.append(CKFTracker_cfg(the_args))
     algList.append(deduper_cfg())
     algList.append(track_filter_cfg())
-    algList.append(track_truth_cfg())
+    algList.append(track_truth_cfg(the_args))
     algList.append(track_refitter_cfg())
 
     # Track Performance Monitoring
