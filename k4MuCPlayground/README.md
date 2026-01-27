@@ -82,6 +82,22 @@ These are set by the setup script. Point them elsewhere if you wish.
 
 ---
 
+## Adding Beam-Induced Background (BIB)
+
+BIB is included during the digitization stage. For this, you will need BIB samples. If you don't have any,
+reach out to your favorite Muon Colliderer and they can probably point you to a set.
+
+BIB can be included by using some key arguments at the digitzation stage:
+```bash
+k4run ../digitization/digi_steer.py \ # As usual
+    --doOverlayFull \ # Turns on BIB Overlay
+    --OverlayFullNumberBackground 100 \ # The amount of BIB. 812 is Full BIB
+    --OverlayFullPathToMuPlus  /Path/to/MuPlus/Files  \ # The directory containing the MuPlus  Files
+    --OverlayFullPathToMuMinus /Path/to/MuMinus/Files \ # The directory containing the MuMinus Files
+```
+
+---
+
 ## Debugging
 
 If you encounter issues with the steering files, try deleting the `__pycache__` directory in `/digitization/components/` and `/reconstruction/components/`. Then run:
