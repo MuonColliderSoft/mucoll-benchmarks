@@ -27,7 +27,7 @@ def get_digi_args():
         "--OverlayFullNumberBackground",
         help="Number of background files used for BIB overlay",
         type=int,
-        default=192, #Magic number assumes 45 phi clones of each MC particle
+        default=812, #Magic number assumes 45 phi clones of each MC particle
     )
 
     parser.add_argument(
