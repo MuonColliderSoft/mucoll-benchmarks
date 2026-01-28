@@ -37,11 +37,16 @@ svc = IOSvc(
 )
 
 # Run the Application Manager
-ApplicationMgr(
-    TopAlg = algList,
-    EvtSel = 'NONE',
-    EvtMax   = 10,
-    ExtSvc = services,
-    EventLoop = selm if mt_args.useMT else None,
-    OutputLevel=INFO
-)
+app_mgr_args = {
+    "TopAlg": algList,
+    "EvtSel": 'NONE',
+    "EvtMax": 10,
+    "ExtSvc": services,
+    "OutputLevel": INFO
+}
+
+# Only add EventLoop if multi-threading is enabled
+if mt_args.useMT:
+    app_mgr_args["EventLoop"] = selm
+
+ApplicationMgr(**app_mgr_args)
