@@ -5,6 +5,10 @@ def makeDigiAlgList(the_args):
     '''    Add the Digitization Algorithms to the Algorithm List    '''
     '''-------------------------------------------------------------'''
     algList = []
+    # Event Counter
+    from event_counter import event_counter_cfg
+    algList.append(event_counter_cfg())
+
     # BIB Overlay
     if the_args.doOverlayFull:
         from digi_components.overlay_full import overlay_full_cfg
