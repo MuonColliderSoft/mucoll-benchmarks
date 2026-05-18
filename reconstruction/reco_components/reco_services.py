@@ -11,6 +11,7 @@ def set_reco_services(the_args):
     geoservice = GeoSvc(
         "GeoSvc",
         detectors = [the_args.DD4hepXMLFile],
+        materialFile = the_args.MatFile,
         OutputLevel = INFO,
         EnableGeant4Geo = False
     )

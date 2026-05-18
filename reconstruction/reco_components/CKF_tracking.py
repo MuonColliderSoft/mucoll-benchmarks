@@ -1,35 +1,31 @@
+from re import VERBOSE
+
 from GaudiKernel.Constants import INFO, WARNING, DEBUG
-from Configurables import ACTSSeededCKFTrackingAlg, ACTSDuplicateRemoval, FilterTracksAlg, TrackTruthAlg, RefitFinal
+from Configurables import CKFTrackingAlg,ACTSSeededCKFTrackingAlg, ACTSDuplicateRemoval, FilterTracksAlg, TrackTruthAlg, RefitFinal
 
 def CKFTracker_cfg(DetectorSchema, MatFile, TGeoFile, TGeoDescFile):
     """
     Create a new ACTSSeededCKFTrackingAlg instance for CKF tracking.
     """
     if DetectorSchema == "MAIA_v0":
-        return ACTSSeededCKFTrackingAlg(
-            "Reconstructor",
-            MatFile = MatFile,
-            TGeoFile = TGeoFile,
-            TGeoDescFile = TGeoDescFile,
-            DetectorSchema = DetectorSchema,
-            RunCKF = "True",
-            CKF_Chi2CutOff = 10,
-            SeedFinding_RMax = 150,
-            SeedFinding_MinPt = 500,
-            SeedFinding_ImpactMax = 3,
-            CKF_NumMeasurementsCutOff = 1,
-            SeedFinding_SigmaScattering = 50,
-            SeedFinding_CollisionRegion = 6,
-            SeedFinding_RadLengthPerSeed = 0.1,
-            SeedingLayers = [
-                "13", "2", "13", "6", "13", "10", "13", "14",
-                "14", "2", "14", "6", "14", "10", "14", "14",
-                "15", "2", "15", "6", "15", "10", "15", "14",
-                "8", "2", "17", "2", "18", "2"],
-            OutputTrackCollectionName = ["AllTracks"],
-            OutputSeedCollectionName = ["SeedTracks"],
-            InputTrackerHitCollectionName = ["MergedTrackerHits"],
-            OutputLevel = INFO
+         return CKFTrackingAlg(
+             "Reconstructor",
+            RunCKF=True,
+            CKF_Chi2CutOff=10,
+            SeedFinding_RMax=150,
+            SeedFinding_MinPt=500,
+            SeedFinding_ImpactMax=3,
+            CKF_NumMeasurementsCutOff=1,
+            SeedFinding_SigmaScattering=50,
+            SeedFinding_CollisionRegion=6,
+            SeedFinding_RadLengthPerSeed=0.1,
+            SeedingSensorsCellIDs=["system:1", "system:2,layer:1|2|3"],
+            OutputTrackCollection="AllTracks",
+            OutputSeedCollection="SeedTracks",
+            InputTrackerHitCollection="MergedTrackerHits",
+            InputTrackerHitRelationCollection="MergedTrackerHitsRelations",
+            NumThreads=4,
+            OutputLevel=INFO,
         )
     else:
         return ACTSSeededCKFTrackingAlg(
