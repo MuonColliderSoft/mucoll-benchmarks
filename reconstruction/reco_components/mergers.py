@@ -8,7 +8,7 @@ def mergehits_cfg():
     return CollectionMerger(
         "MergeHits",
         InputCollections = ["VXDBarrelHits", "ITBarrelHits", "OTBarrelHits", "VXDEndcapHits", "ITEndcapHits", "OTEndcapHits"],
-        OutputCollection = ["MergedTrackerHits"],
+        OutputCollection = "MergedTrackerHits",
         OutputLevel = INFO
     )
 
@@ -20,6 +20,6 @@ def mergehitsrelations_cfg():
         "MergeHitsRelations",
         InputCollections = ["VXDBarrelHitsRelations", "ITBarrelHitsRelations", "OTBarrelHitsRelations",
                             "VXDEndcapHitsRelations", "ITEndcapHitsRelations", "OTEndcapHitsRelations"],
-        OutputCollection = ["MergedTrackerHitsRelations"],
+        OutputCollection = "MergedTrackerHitsRelations",
         OutputLevel = INFO
     )
