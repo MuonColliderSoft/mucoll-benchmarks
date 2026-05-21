@@ -1,13 +1,13 @@
 from re import VERBOSE
 
 from GaudiKernel.Constants import INFO, WARNING, DEBUG
-from Configurables import CKFTrackingAlg,ACTSSeededCKFTrackingAlg, ACTSDuplicateRemoval, FilterTracksAlg, TrackTruthAlg, RefitFinal
+from Configurables import CKFTrackingAlg, ACTSSeededCKFTrackingAlg, ACTSDuplicateRemoval, FilterTracksAlg, TrackTruthAlg, RefitFinal
 
 def CKFTracker_cfg(args):
     """
     Create a new ACTSSeededCKFTrackingAlg instance for CKF tracking.
     """
-    if DetectorSchema == "MAIA_v0":
+    if args.DetectorSchema == "MAIA_v0":
          return CKFTrackingAlg(
              "Reconstructor",
             RunCKF = True,
@@ -52,7 +52,7 @@ def CKFTracker_cfg(args):
             OutputTrackCollectionName = ["AllTracks"],
             OutputSeedCollectionName = ["SeedTracks"],
             InputTrackerHitCollectionName = ["MergedTrackerHits"],
-            OutputLevel = INFO
+            OutputLevel = INFO,
         )
 
 def deduper_cfg():
