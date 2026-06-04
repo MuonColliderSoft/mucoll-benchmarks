@@ -1,0 +1,3 @@
+[submodule "plotting/TrackingPlots"]
+	path = plotting/TrackingPlots
+	url = https://github.com/samf25/TrackingPlots.git
