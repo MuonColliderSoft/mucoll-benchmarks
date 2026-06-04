@@ -1,5 +1,5 @@
 from GaudiKernel.Constants import INFO, WARNING
-from Configurables import DDMuonDigiSimple
+from Configurables import DDSimpleMuonDigi
 
 def MuonBarrelDigi_cfg(args):
     """
@@ -9,14 +9,13 @@ def MuonBarrelDigi_cfg(args):
         inputHitCollections = ["OverlayYokeBarrelCollection"]
     else:
         inputHitCollections = ["YokeBarrelCollection"]
-    return DDMuonDigiSimple(
+    return DDSimpleMuonDigi(
         "MuonBarrelDigitiser",
-        calibrationCoeffmuon = 70.1,
+        CalibrMUON = 70.1,
         MuonThreshold = 1e-06,
-        maxMuonHitEnergy = 2.0,
-        CaloLayout = "barrel",
+        MaxHitEnergyMUON = 2.0,
         MUONCollection = inputHitCollections,
-        MUONOutputCollections = ["MuonBarrelHits"],
+        MUONOutputCollection = ["MuonBarrelHits"],
         RelationOutputCollection = ["MuonBarrelHitsRelations"],
         OutputLevel = INFO
     )
@@ -30,14 +29,13 @@ def MuonEndcapDigi_cfg(args):
         inputHitCollections = ["OverlayYokeEndcapCollection"]
     else:
         inputHitCollections = ["YokeEndcapCollection"]
-    return DDMuonDigiSimple(
+    return DDSimpleMuonDigi(
         "MuonEndcapDigitiser",
-        calibrationCoeffmuon = 70.1,
+        CalibrMUON = 70.1,
         MuonThreshold = 1e-06,
-        maxMuonHitEnergy = 2.0,
-        CaloLayout = "endcap",
+        MaxHitEnergyMUON = 2.0,
         MUONCollection = inputHitCollections,
-        MUONOutputCollections = ["MuonEndcapHits"],
+        MUONOutputCollection = ["MuonEndcapHits"],
         RelationOutputCollection = ["MuonEndcapHitsRelations"],
         OutputLevel = INFO
     )
