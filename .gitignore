@@ -1,0 +1,10 @@
+# Python build cruft
+**/__pycache__/
+*.pyc
+
+# OS cruft
+.DS_Store
+
+# Local run outputs
+k4MuCPlayground/**/*.root
+k4MuCPlayground/PandoraSettings/

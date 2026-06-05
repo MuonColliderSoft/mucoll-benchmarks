@@ -1,0 +1,67 @@
+# MUMU_H_bb
+########################################################################
+#
+#
+## Author Donatella Lucchesi
+#########################################################################
+#
+model = SM
+#Set widths and masses
+me     = 0d0
+mmu    = 0d0
+mtop   = 174 GeV
+wtop   = 1.37 GeV
+mW     = 80.45 GeV
+wW     = 2.071 GeV
+mZ     = 91.188 GeV
+wZ     = 2.478 GeV
+mH     = 125 GeV
+wH     = 0.00407 GeV 
+
+alias ANU = nuebar:numubar:nutaubar
+alias NNU = nue:numu:nutau
+alias q      = b
+alias qbar   = B
+
+#CoM Energy and seed
+sqrts = 10 TeV
+seed = 1889
+
+#Higgs production
+process hdec = "e2", "E2" => "H", NNU, ANU 
+#Higgs decay
+process hbb = "H" => q, qbar
+
+
+#Call O'Mega and compile the matrix elements 
+compile
+
+#Define cuts
+cuts = all M > 150 GeV [NNU, ANU]
+
+#Parton shower and hadronization done with Pythia8 
+?ps_fsr_active = true
+?hadronization_active = true
+?allow_shower = true
+#
+$shower_method = "PYTHIA8"
+$hadronization_method = "PYTHIA8"
+
+
+# Compute Cross Section for Hbb
+integrate (hbb)
+# Specify H can decay
+unstable "H" (hbb)
+# Simulate the full process
+integrate (hdec){  iterations = 20:8000000:"gw", 5:20000000 }
+show(results)
+
+#Generate events sample
+simulate (hdec){
+n_events=1000
+
+$sample = "mumu_H_bb_3TeV"
+sample_format = hepmc
+}
+
+# end
