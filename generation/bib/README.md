@@ -15,19 +15,20 @@ Several different scripts are available for different data formats.
 Typical use example:
 
 ```bash
-python3 fluka_to_slcio.py input1.dat input2.dat ... inputN.dat output.slcio
+python3 fluka_to_slcio.py -v 2 input1.dat input2.dat ... inputN.dat output.slcio
 ```
 
-By default it will combine all particles from each input `.dat` file into a separate event in the output `.slcio` file, e.g. sample of 5 input files with 200 particles/file will be stored as 5 events with 200 particles/event in the output file.
+Version `-v` of the input binary format must be always specified.
+All the supported format versions are defined [here](/generation/bib/data_formats.py).
 
-> **ATTENTION:**
-> Absolute time of each particle has to be corrected by the bunch-crossing time, which is defined by the `-b` option, whose value might be different from the default one.
-> Ensure that the correct value is used for each sample.
+By default it will combine all particles from each input `.dat` file into a single event in the output `.slcio` file, e.g. sample of 5 input files with 200 particles/file will be stored as 5 events with 200 particles/event in the output `.slcio` file.
+
 
 Several useful options:
 
-* `-f N` - combines `N` input files into a single event
-* `-n N` - creates `N` copies of each input particle randomly distributed in Phi, to increase statistics
+* `-f N` - merges `N` input files into a single event. Use `-f -1` to treat all files as a continuous stream of particles
+* `-l N` - merges `N` input particles into a single event. Use `-l -1` (default) to put all particles into a single event
+* `-n N` - adds `N-1` copies of each input particle randomly distributed in Phi to the same `LCIO` event, to increase statistics
 
 - - -
 
