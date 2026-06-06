@@ -1,3 +1,9 @@
 [submodule "plotting/TrackingPlots"]
 	path = plotting/TrackingPlots
 	url = https://github.com/samf25/TrackingPlots.git
+[submodule "configs/MuCollConfig"]
+	path = configs/MuCollConfig
+	url = https://github.com/MuonColliderSoft/MuCollConfig.git
+[submodule "configs/MAIAConfig"]
+	path = configs/MAIAConfig
+	url = https://github.com/MuonColliderSoft/MAIAConfig.git
