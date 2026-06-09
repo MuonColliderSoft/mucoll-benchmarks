@@ -7,3 +7,6 @@
 [submodule "configs/MAIAConfig"]
 	path = configs/MAIAConfig
 	url = https://github.com/MuonColliderSoft/MAIAConfig.git
+[submodule "configs/MuSICConfig"]
+	path = configs/MuSICConfig
+	url = https://github.com/MuonColliderSoft/MuSICConfig.git
