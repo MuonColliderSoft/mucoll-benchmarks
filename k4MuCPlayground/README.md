@@ -12,7 +12,7 @@ With the new image, everything works out-of-the-box. The path to the setup scrip
 apptainer shell --cleanenv docker://ghcr.io/muoncollidersoft/mucoll-sim-alma9:full_gaudi_test 
 source /opt/spack/opt/spack/.../linux-almalinux9-x86_64/mucoll-stack-.../setup.sh
 cd /path/to/k4MuCPlayground
-source setup_digireco.sh ../ DETECTOR_GEOMETRY_NAME
+source ../setup_config.sh ../ DETECTOR_GEOMETRY_NAME
 ```
 
 > **Note:**  
@@ -41,7 +41,7 @@ ddsim --steeringFile ../simulation/steer_baseline.py --numberOfEvents 1
 ## Digitization
 
 ```bash
-k4run ../digitization/digi_steer.py 
+k4run "$MUCOLL_CONFIG/$MUCOLL_CONFIG_NAME/digi_steer.py"
 ```
 
 ---
@@ -49,8 +49,7 @@ k4run ../digitization/digi_steer.py
 ## Reconstruction
 
 ```bash
-cp -r ../reconstruction/PandoraSettings/ ./
-k4run ../reconstruction/reco_steer.py
+k4run "$MUCOLL_CONFIG/$MUCOLL_CONFIG_NAME/reco_steer.py"
 ```
 
 ---
@@ -89,25 +88,12 @@ reach out to your favorite Muon Colliderer and they can probably point you to a 
 
 BIB can be included by using some key arguments at the digitzation stage:
 ```bash
-k4run ../digitization/digi_steer.py \ # As usual
+k4run "$MUCOLL_CONFIG/$MUCOLL_CONFIG_NAME/digi_steer.py" \
     --doOverlayFull \ # Turns on BIB Overlay
     --OverlayFullNumberBackground 100 \ # The amount of BIB. 812 is Full BIB
     --OverlayFullPathToMuPlus  /Path/to/MuPlus/Files  \ # The directory containing the MuPlus  Files
     --OverlayFullPathToMuMinus /Path/to/MuMinus/Files \ # The directory containing the MuMinus Files
 ```
-
----
-
-## Debugging
-
-If you encounter issues with the steering files, try deleting the `__pycache__` directory in `/digitization/components/` and `/reconstruction/components/`. Then run:
-
-```bash
-touch digitization/components/__init__.py
-touch reconstruction/components/__init__.py
-```
-
-before re-running your steering file.
 
 ---
 
