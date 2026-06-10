@@ -77,7 +77,7 @@ if [ ! -d "$CONFIG_PACKAGE_PATH" ]; then
 fi
 
 GEO_BASE="${MUCOLL_GEO_BASE:-/opt/spack/opt/spack}"
-GEO_DIR=$(find "$GEO_BASE"/*/*/*/*/linux-x86_64/k4geo*/share/k4geo/MuColl/"$GEOM_TYPE"/compact/"$GEOM_NAME"/ 2>/dev/null | head -n 1)
+GEO_DIR=$(find "$GEO_BASE"/*/*/*/*/linux-*/k4geo*/share/k4geo/MuColl/"$GEOM_TYPE"/compact/"$GEOM_NAME"/ 2>/dev/null | head -n 1)
 if [ -n "$GEO_DIR" ]; then
     if [[ "$GEOM_TYPE" == "MuColl" ]]; then
         XML_NAME="${GEOM_NAME%%.*}.xml"
@@ -94,26 +94,34 @@ if [ ! -f "$GEO_PATH" ]; then
     return 1
 fi
 
-k4AT_DIR=$(find "$GEO_BASE"/*/*/*/*/linux-x86_64/k4actstracking*/share/k4ActsTracking/data/ 2>/dev/null | head -n 1)
+k4AT_DIR=$(find "$GEO_BASE"/*/*/*/*/linux-*/k4actstracking*/share/k4ActsTracking/data/ 2>/dev/null | head -n 1)
 if [ -z "$k4AT_DIR" ]; then
     _mucoll_box_error "k4ActsTracking data directory not found" "$GEO_BASE"
     return 1
 fi
 
-if [[ "$GEOM_TYPE" == "MuColl" ]]; then
-    START_NAME="${GEOM_NAME%%.*}"
-else
-    START_NAME="${GEOM_NAME}"
-fi
+# MAIA builds the ACTS tracking geometry from the compact description and needs
+# no prebuilt TGeo. MuColl and MuSIC still use the older tracking config that
+# reads the TGeo (.root) and its subdetector description (.json).
+if [[ "$GEOM_TYPE" != "MAIA" ]]; then
+    if [[ "$GEOM_TYPE" == "MuColl" ]]; then
+        START_NAME="${GEOM_NAME%%.*}"
+    else
+        START_NAME="${GEOM_NAME}"
+    fi
 
-if [ ! -f "$k4AT_DIR/${START_NAME}.root" ]; then
-    _mucoll_box_error "TGeo file not found for" "$GEOM_NAME"
-    return 1
-fi
+    if [ ! -f "$k4AT_DIR/${START_NAME}.root" ]; then
+        _mucoll_box_error "TGeo file not found for" "$GEOM_NAME"
+        return 1
+    fi
 
-if [ ! -f "$k4AT_DIR/${START_NAME}.json" ]; then
-    _mucoll_box_error "Subdetector JSON file not found for" "$GEOM_NAME"
-    return 1
+    if [ ! -f "$k4AT_DIR/${START_NAME}.json" ]; then
+        _mucoll_box_error "Subdetector JSON file not found for" "$GEOM_NAME"
+        return 1
+    fi
+
+    export MUCOLL_TGEO="$k4AT_DIR/${START_NAME}.root"
+    export MUCOLL_TGEO_DESC="$k4AT_DIR/${START_NAME}.json"
 fi
 
 if [[ "$GEOM_TYPE" == "MAIA" ]]; then
@@ -128,8 +136,6 @@ fi
 
 export MUCOLL_GEOM_NAME="$GEOM_NAME"
 export MUCOLL_GEO="$GEO_PATH"
-export MUCOLL_TGEO="$k4AT_DIR/${START_NAME}.root"
-export MUCOLL_TGEO_DESC="$k4AT_DIR/${START_NAME}.json"
 export MUCOLL_MATMAP="$MATMAP_PATH"
 export MUCOLL_CONFIG="$CONFIG_PATH"
 export MUCOLL_CONFIG_NAME="$CONFIG_NAME"
@@ -143,7 +149,10 @@ echo "   ╭──────────────────────�
 _mucoll_center_line "Setting Muon Collider configuration"
 echo "   ├──────────────────────────────────────────────────────────────────────┤"
 
-vars=(MUCOLL_GEOM_NAME MUCOLL_CONFIG_NAME MUCOLL_CONFIG MUCOLL_GEO MUCOLL_TGEO MUCOLL_MATMAP MUCOLL_TGEO_DESC)
+vars=(MUCOLL_GEOM_NAME MUCOLL_CONFIG_NAME MUCOLL_CONFIG MUCOLL_GEO MUCOLL_MATMAP)
+if [[ "$GEOM_TYPE" != "MAIA" ]]; then
+    vars+=(MUCOLL_TGEO MUCOLL_TGEO_DESC)
+fi
 maxlen=0
 for var in "${vars[@]}"; do
     len=${#var}
