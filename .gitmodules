@@ -4,9 +4,12 @@
 [submodule "configs/MuCollConfig"]
 	path = configs/MuCollConfig
 	url = https://github.com/MuonColliderSoft/MuCollConfig.git
+	branch = main
 [submodule "configs/MAIAConfig"]
 	path = configs/MAIAConfig
 	url = https://github.com/MuonColliderSoft/MAIAConfig.git
+	branch = main
 [submodule "configs/MuSICConfig"]
 	path = configs/MuSICConfig
 	url = https://github.com/MuonColliderSoft/MuSICConfig.git
+	branch = main
