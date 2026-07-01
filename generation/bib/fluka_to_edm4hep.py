@@ -16,8 +16,6 @@ parser.add_argument('-f', '--files_event', metavar='L',  help='Number of files t
 parser.add_argument('-m', '--max_lines', metavar='M',  help='Maximum number of lines to process', type=int, default=None)
 parser.add_argument('-o', '--overwrite',  help='Overwrite existing output file', action='store_true', default=False)
 parser.add_argument('-z', '--invert_z', help='Invert Z position and Z momentum (use for the second beam direction)', action='store_true', default=False)
-parser.add_argument('--pdgs', metavar='ID',  help='PDG IDs of particles to be included', type=int, default=None, nargs='+')
-parser.add_argument('--nopdgs', metavar='ID',  help='PDG IDs of particles to be excluded', type=int, default=None, nargs='+')
 parser.add_argument('--np_min', metavar='P',  help='Minimum momentum of accepted neutrons [GeV]', type=float, default=None)
 parser.add_argument('--t_max', metavar='T',  help='Maximum time of accepted particles [ns]', type=float, default=None)
 
@@ -137,12 +135,6 @@ for iF, file_in in enumerate(args.files_in):
 			pdg = FLUKA_PIDS[fid]
 		except KeyError:
 			print(f'WARNING: Unknown PDG ID for FLUKA ID: {fid}')
-			continue
-
-		# Apply PDG filters for BIB pruning
-		if args.pdgs is not None and pdg not in args.pdgs:
-			continue
-		if args.nopdgs is not None and pdg in args.nopdgs:
 			continue
 
 		# Calculating the absolute time of the particle [ns]
