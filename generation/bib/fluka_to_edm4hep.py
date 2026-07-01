@@ -71,8 +71,6 @@ line_dt=np.dtype([
 ######################################## Start of the processing
 print(f'Converting data from {len(args.files_in)} file(s)\nto EDM4HEP file: {args.file_out:s}\nwith normalization: {args.normalization:.1f}')
 print(f'Storing {args.files_event:d} files/event');
-if args.pdgs is not None:
-	print(f'Will only use particles with PDG IDs: {args.pdgs}')
 
 # Initialize the EDM4HEP file writer
 writer = Writer(args.file_out)
@@ -88,10 +86,6 @@ if args.t_max:
 	frame.put_parameter("Time_max", str(args.t_max))
 if args.np_min:
 	frame.put_parameter("NeutronMomentum_min", str(args.np_min))
-if args.pdgs:
-	frame.put_parameter("PdgIds", str(args.pdgs))
-if args.nopdgs:
-	frame.put_parameter("NoPdgIds", str(args.nopdgs))
 if args.comment:
 	frame.put_parameter("Comment", str(args.comment))
 if args.invert_z:
