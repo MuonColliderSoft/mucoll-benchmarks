@@ -6,13 +6,13 @@ import argparse
 import numpy as np
 
 
-parser = argparse.ArgumentParser(description='Convert FLUKA binary file to SLCIO file with MCParticles')
+parser = argparse.ArgumentParser(description='Convert FLUKA binary file to EDM4HEP file with MCParticles')
 parser.add_argument('files_in', metavar='FILE_IN', help='Input binary FLUKA file(s)', nargs='+')
 parser.add_argument('file_out', metavar='FILE_OUT.edm4hep.root', help='Output EDM4HEP file')
 parser.add_argument('-c', '--comment', metavar='TEXT',  help='Comment to be added to the header', type=str)
 parser.add_argument('-b', '--bx_time', metavar='TIME',  help='Time of the bunch crossing [s]', type=float, default=0.0)
 parser.add_argument('-n', '--normalization', metavar='N',  help='Normalization of the generated sample', type=float, default=1.0)
-parser.add_argument('-f', '--files_event', metavar='L',  help='Number of files to merge into a single LCIO event (default: 1)', type=int, default=1)
+parser.add_argument('-f', '--files_event', metavar='L',  help='Number of files to merge into a single EDM4HEP event (default: 1)', type=int, default=1)
 parser.add_argument('-m', '--max_lines', metavar='M',  help='Maximum number of lines to process', type=int, default=None)
 parser.add_argument('-o', '--overwrite',  help='Overwrite existing output file', action='store_true', default=False)
 parser.add_argument('-z', '--invert_z', help='Invert Z position and Z momentum (use for the second beam direction)', action='store_true', default=False)
