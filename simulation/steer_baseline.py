@@ -14,13 +14,13 @@ SIM.enableG4GPS = False
 SIM.enableG4Gun = False
 SIM.enableGun = False
 ## InputFiles for simulation .stdhep, .slcio, .HEPEvt, .hepevt, .hepmc files are supported
-SIM.inputFiles = ["input.stdhep"]
+SIM.inputFiles = ["gen_output.edm4hep.root"]
 ## Macro file to execute for runType 'run' or 'vis'
 SIM.macroFile = ""
 ## number of events to simulate, used in batch mode. -1 all
 SIM.numberOfEvents = -1
 ## Outputfile from the simulation,only lcio output is supported
-SIM.outputFile = "output_sim.slcio"
+SIM.outputFile = "sim_output.edm4hep.root"
 ## Verbosity use integers from 1(most) to 7(least) verbose
 ## or strings: VERBOSE, DEBUG, INFO, WARNING, ERROR, FATAL, ALWAYS
 SIM.printLevel = "INFO"
@@ -207,7 +207,7 @@ SIM.part.saveProcesses = ['Decay']
 ## Configuration for the PhysicsList 
 ################################################################################
 SIM.physics.decays = False
-SIM.physics.list = "QGSP_BERT"
+SIM.physics.list = "FTFP_BERT_HP"
 
 ##  location of particle.tbl file containing extra particles and their lifetime information
 ##     

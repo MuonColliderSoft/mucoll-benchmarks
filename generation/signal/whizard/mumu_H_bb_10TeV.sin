@@ -24,7 +24,7 @@ alias q      = b
 alias qbar   = B
 
 #CoM Energy and seed
-sqrts = 3 TeV
+sqrts = 10 TeV
 seed = 1889
 
 #Higgs production

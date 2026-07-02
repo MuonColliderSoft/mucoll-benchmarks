@@ -24,8 +24,8 @@ class TheDriver(Driver):
         self.config = {
             'collections': collections,
             'output': output,
-            't_min': None,
-            't_max': None
+            't_min': -1e9,
+            't_max': 1e9
         }
         self.out_file = R.TFile(self.config['output'], 'RECREATE')
 
@@ -45,9 +45,12 @@ class TheDriver(Driver):
         names_I = ['layer', 'side', 'col_id',
                    'mcp_pdg', 'mcp_bib_pdg', 'mcp_bib_niters', 'mcp_gen', 'mcp_bib_gen']
         
+        # Placeholder for CellID decoders
+        self.cellID_decoders = {col_id: None for col_id, col_name in enumerate(self.config['collections'])}
         # Creating the TTree with branches
         self.data = {}
         self.tree = R.TTree('tree', 'SimTrackerHit properties')
+        # self.tree.SetAutoFlush(200000)
         for name in names_F:
             self.data[name] = np.zeros(1, dtype=np.float32)
             self.tree.Branch(name, self.data[name], '{0:s}/F'.format(name))
@@ -62,19 +65,18 @@ class TheDriver(Driver):
         mcParticles = event.getMcParticles()
         # Loop over hits in each hit collection
         for col_id, col_name in enumerate(self.config['collections']):
-            # print('Event: {0:d} Col: {1:s}'.format(event.getEventNumber(), col_name))
             col = event.getCollection(col_name)
-            # print('  N elements: {0:d}'.format(col.getNumberOfElements()))
-            # Creating the CellID decocder for the collection
-            cell_id_encoding = col.getParameters().getStringVal(EVENT.LCIO.CellIDEncoding)
-            cell_id_decoder = UTIL.BitField64(cell_id_encoding)
+            # Creating the CellID decoder for this collection
+            if not self.cellID_decoders[col_id]:
+                cell_id_encoding = col.getParameters().getStringVal(EVENT.LCIO.CellIDEncoding)
+                cell_id_decoder = UTIL.BitField64(cell_id_encoding)
+                self.cellID_decoders[col_id] = cell_id_decoder
+            else:
+                cell_id_decoder = self.cellID_decoders[col_id]
             # Filling the Tracker hit properties
             data = self.data
             nHits = col.getNumberOfElements()
-            # print('Checking {1:d} hits from: {0:s}'.format(col_name, nHits))
             for iHit in range(nHits):
-                # if iHit % int(nHits/10) == 0:
-                #     print('  hit {0:d} / {1:d}'.format(iHit, nHits))
                 # Hit time information
                 hit = col.getElementAt(iHit)
                 data['time'][0] = hit.getTime()

@@ -13,7 +13,7 @@ parser.add_argument('-d', '--decays', metavar='D',  help='Number of decays simul
 parser.add_argument('-i', '--invert_pdgs', help='Invert PDG IDs selection', default=False, action='store_true')
 parser.add_argument('-l', '--lines_event', metavar='L',  help='Number of lines to put in a single LCIO event (default: 1000)', type=int, default=1000)
 parser.add_argument('-m', '--max_lines', metavar='M',  help='Maximum number of lines to process', type=int, default=None)
-parser.add_argument('-n', '--ne_min', metavar='E',  help='Minimum energy of accepted neutrons [GeV]', type=float, default=None)
+parser.add_argument('-n', '--np_min', metavar='N',  help='Minimum momentum of accepted neutrons [GeV]', type=float, default=None)
 parser.add_argument('-o', '--overwrite',  help='Overwrite existing output file', action='store_true', default=False)
 parser.add_argument('-p', '--pdgs', metavar='ID',  help='PDG IDs of particles to be included', type=int, default=None, nargs='+')
 parser.add_argument('-t', '--t_max', metavar='T',  help='Maximum time of accepted particles [ns]', type=float, default=None)
@@ -54,8 +54,8 @@ run.parameters().setValue("NDecays", args.decays)
 run.parameters().setValue("WNominator", args.weight)
 if args.t_max:
     run.parameters().setValue("Time_max", args.t_max)
-if args.ne_min:
-    run.parameters().setValue("NeutronEnergy_min", args.ne_min)
+if args.np_min:
+    run.parameters().setValue("NeutronMomentum_min", args.np_min)
 if args.pdgs:
     run.parameters().setValue("PdgIds", str(args.pdgs))
     run.parameters().setValue("NoPdgIds", args.invert_pdgs)
@@ -111,8 +111,8 @@ with open(args.file_in) as file_in:
         # Converting the rest of string values to floats
         x,y,z, px,py,pz, toff, w = map(float, ss[2:10])
 
-        # Skipping if it's a neutron with too low kinetic energy
-        if args.ne_min is not None and abs(pdg) == 2112 and sqrt(px*px + py*py + pz*pz) < args.ne_min:
+        # Skipping if it's a neutron with too low momentum
+        if args.np_min is not None and abs(pdg) == 2112 and sqrt(px*px + py*py + pz*pz) < args.np_min:
             continue
 
         # Converting time: s -> ns
