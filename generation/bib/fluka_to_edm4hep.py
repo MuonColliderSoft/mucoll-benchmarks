@@ -10,7 +10,6 @@ parser = argparse.ArgumentParser(description='Convert FLUKA binary file to EDM4H
 parser.add_argument('files_in', metavar='FILE_IN', help='Input binary FLUKA file(s)', nargs='+')
 parser.add_argument('file_out', metavar='FILE_OUT.edm4hep.root', help='Output EDM4HEP file')
 parser.add_argument('-c', '--comment', metavar='TEXT',  help='Comment to be added to the header', type=str)
-parser.add_argument('-b', '--bx_time', metavar='TIME',  help='Time of the bunch crossing [s]', type=float, default=0.0)
 parser.add_argument('-n', '--normalization', metavar='N',  help='Normalization of the generated sample', type=float, default=1.0)
 parser.add_argument('-f', '--files_event', metavar='L',  help='Number of files to merge into a single EDM4HEP event (default: 1)', type=int, default=1)
 parser.add_argument('-m', '--max_lines', metavar='M',  help='Maximum number of lines to process', type=int, default=None)
@@ -79,7 +78,6 @@ writer = Writer(args.file_out)
 frame = podio.Frame()
 frame.put_parameter("InputFiles", len(args.files_in))
 frame.put_parameter("Normalization", str(args.normalization))
-frame.put_parameter("BXTime", str(args.bx_time))
 frame.put_parameter("FilesPerEvent", str(args.files_event))
 
 if args.t_max:
