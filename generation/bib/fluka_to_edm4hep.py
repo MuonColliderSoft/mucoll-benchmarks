@@ -282,12 +282,11 @@ for iF, file_in in enumerate(args.files_in):
 					n_particles = m_col.size()  # save before move invalidates m_col
 					m_evt.put(cppyy.gbl.std.move(m_col), "MCParticles")
 					writer.write_frame(m_evt, 'events')
-					nEvents += 1
 					print(f'Wrote event: {nEvents:d} with {n_particles} particles from mother muon #{muon_id:d} (copy {iP+1}/{nP})')
+					nEvents += 1
 		else:
 			# Legacy mode: all mother muons of this file group merged into a single event
 			# (one bunch crossing).
-			nEvents += 1
 			dbg(f'  building event {nEvents}: {len(mother_particles)} muon group(s), '
 				f'making ~{args.normalization} copy(ies) of each')
 			for mother, particles in mother_particles.items():
@@ -301,6 +300,7 @@ for iF, file_in in enumerate(args.files_in):
 			evt.put(cppyy.gbl.std.move(col), "MCParticles")
 			writer.write_frame(evt, 'events')
 			print(f'Wrote event: {nEvents:d} with {n_particles} particles from {len(mother_particles):d} mother muon(s)')
+			nEvents += 1
 	
 print(f'Wrote {nEvents:d} events to file: {args.file_out:s}')
 dbg('')
