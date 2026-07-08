@@ -125,7 +125,6 @@ else:
 dbg('==================== verbose mode ON ====================')
 dbg( 'Settings for this run:')
 dbg(f'    record size    : {line_dt.itemsize} bytes per particle')
-dbg(f'    bunch crossing : {args.bx_time} s')
 dbg(f'    files / event  : {args.files_event}')
 dbg(f'    split mothers  : {"yes (one event per muon)" if args.split else "no"}')
 dbg(f'    normalization  : {args.normalization} (copies per muon decay)')
@@ -215,7 +214,7 @@ for iF, file_in in enumerate(args.files_in):
 			continue
 
 		# Calculating the absolute time of the particle [ns]
-		t = (toff - args.bx_time) * 1e9
+		t = toff * 1e9
 
 		# Skipping if particle's time is greater than allowed
 		if args.t_max is not None and t > args.t_max:
