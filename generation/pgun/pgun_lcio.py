@@ -154,5 +154,5 @@ for e in range(args.events):
 		print(f'Wrote event {n_events}/{args.events}')
 # Closing the output file
 wrt.close()
-print(f'Wrote {n_particles} partiles in {n_events} events to file: {args.output}')
+print(f'Wrote {n_particles} particles in {n_events} events to file: {args.output}')
 
