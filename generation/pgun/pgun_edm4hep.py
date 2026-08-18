@@ -157,5 +157,5 @@ for e in range(args.events):
 	writer.write_frame(evt, 'events')
 # Closing the output file
 #writer.finish()
-print(f'Wrote {n_particles} partiles in {n_events} events to file: {args.output}')
+print(f'Wrote {n_particles} particles in {n_events} events to file: {args.output}')
 
