@@ -75,6 +75,11 @@ for name, values in configs.items():
 		samples[name] = rng.random(sample_size) * (values[1] - values[0]) + values[0]
 	elif len(values) == 3:
 		samples[name] = rng.normal(values[1], values[2], sample_size)
+	else:
+		raise ValueError(
+			f"Invalid number of values for '{name}': expected 1, 2, or 3, but got {len(values)}"
+		)
+		
 # Adding randomised phi angle for d0
 samples['dphi'] = rng.random(sample_size) * math.pi * 2.
 
@@ -152,7 +157,7 @@ for e in range(args.events):
 		n_particles += 1
 	# Writing the event
 	n_events += 1
-	if n_events % max(1, args.events // 10) == 0:
+ 	if n_events % max(1, (args.events + 9) // 10) == 0:
 		print(f'Wrote event {n_events}/{args.events}')
 	evt.put(cppyy.gbl.std.move(col), "MCParticles")	
 	writer.write_frame(evt, 'events')
