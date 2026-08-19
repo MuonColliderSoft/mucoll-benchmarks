@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 This script generates a file with LCIO::MCParticles of specified parameters
 
@@ -74,7 +74,12 @@ for name, values in configs.items():
 	elif len(values) == 2:
 		samples[name] = rng.random(sample_size) * (values[1] - values[0]) + values[0]
 	elif len(values) == 3:
-		samples[name] = np.random.normal(values[1], values[2], sample_size)
+		samples[name] = rng.normal(values[1], values[2], sample_size)
+	else:
+		raise ValueError(
+			f"Invalid number of values for '{name}': expected 1, 2, or 3, but got {len(values)}"
+		)
+		
 # Adding randomised phi angle for d0
 samples['dphi'] = rng.random(sample_size) * math.pi * 2.
 
@@ -87,6 +92,7 @@ frame = podio.Frame()
 frame.put_parameter('pdgIds', str(args.pdg))
 frame.put_parameter('events', str(args.events))
 frame.put_parameter('particles/event', str(args.particles))
+frame.put_parameter('seed', str(args.seed))
 if args.comment:
 	frame.put_parameter('comment', args.comment)
 for name, values in configs.items():
@@ -111,7 +117,7 @@ for e in range(args.events):
 	for p in range(args.particles):
 		pdg_idx = p
 		if choose_random_pdg:
-			pdg_idx = np.random.choice(n_pdgs, 1)[0]
+			pdg_idx = rng.choice(n_pdgs, 1)[0]
 		pdg = args.pdg[pdg_idx]
 		# Calculating all properties for this particle in the event
 		phi = math.radians(samples['phi'][e])
@@ -151,11 +157,10 @@ for e in range(args.events):
 		n_particles += 1
 	# Writing the event
 	n_events += 1
-	if n_events % (args.events / 10) == 0:
+ 	if n_events % max(1, (args.events + 9) // 10) == 0:
 		print(f'Wrote event {n_events}/{args.events}')
 	evt.put(cppyy.gbl.std.move(col), "MCParticles")	
 	writer.write_frame(evt, 'events')
 # Closing the output file
 #writer.finish()
 print(f'Wrote {n_particles} particles in {n_events} events to file: {args.output}')
-
