@@ -1,42 +1,63 @@
 # Reconstruction benchmark metrics
 
-`extract_metrics.py` reduces one or more EDM4hep reconstruction outputs to a
-small JSON document suitable for release comparisons and CI artifacts. It does
-not apply pass/fail tolerances. Reference values and tolerances should be added
-only after the metric definitions and their statistical stability have been
-reviewed.
+The EDM4hep studies under [`analysis/python/edm4hep`](../python/edm4hep/)
+optionally write compact JSON sidecars with the same quantities and selections
+used for their plots. `aggregate_metrics.py` validates and combines whichever
+study sidecars were produced; it does not recalculate physics quantities.
 
-The current metrics cover:
+This keeps one authoritative definition of each metric:
 
-- truth-particle kinematics and PDG counts;
-- Pandora PFO multiplicity, nearest-PFO matching, and energy/momentum response;
-- selected-track multiplicity and the fraction of events with a selected track;
-- reconstructed ECAL and HCAL hit multiplicities and energies; and
-- input checksums and the availability of required and optional collections.
+- `study_tracks.py` reports tracking efficiency, fake rate, track quality, and
+  track resolutions;
+- `study_seeds.py` reports seed matching, multiplicity, and resolutions;
+- `study_hits.py` reports tracker-hit occupancy;
+- `study_photons.py` reports photon matching, PFO multiplicity, response, and
+  resolution; and
+- `study_notracks.py` can report the optional empty-track diagnostic.
 
-Matching uses the nearest Pandora PFO in eta-phi distance and accepts it when
-`deltaR < 0.1` by default. The first `MCParticles` entry is treated as the gun
-particle, matching the particle-gun samples used by the validation chain.
+PFO matching uses the shared delta-R implementation in
+`benchmark_metrics.py`. Study sidecars record their collection names, cuts,
+binning or finite histogram range, event counts, and producer checksum.
 
-Run the extractor in a Muon Collider software environment. For example:
+## Produce and aggregate sidecars
+
+Pass `--metrics` to any study. For example:
 
 ```bash
 source /opt/setup_mucoll.sh
-python analysis/benchmarks/extract_metrics.py \
+python analysis/python/edm4hep/study_tracks.py \
+  -i reco.edm4hep.root \
+  -o histos_tracks.root \
+  -d plots \
+  --metrics metrics_tracks.json
+
+python analysis/benchmarks/aggregate_metrics.py \
+  --sample-label pion \
+  --input reco.edm4hep.root \
   --expected-events 100 \
-  --sample muon=/path/to/muon/reco.edm4hep.root \
-  --sample electron=/path/to/electron/reco.edm4hep.root \
-  --sample pion=/path/to/pion/reco.edm4hep.root \
-  --sample photon=/path/to/photon/reco.edm4hep.root \
+  --fragment metrics_tracks.json \
+  --fragment metrics_seeds.json \
+  --fragment metrics_hits.json \
   --output metrics.json
 ```
 
-The lightweight helper tests do not require ROOT:
+The aggregator records the RECO input size and SHA-256, the installed
+`mucoll-stack` version from `MUCOLL_RELEASE_VERSION`, the benchmark Git revision
+and dirty state, aggregator and fragment checksums, and stable GitHub Actions
+identifiers when present. If `submission.json` accompanies the RECO input, its
+container, geometry, generated-input, and source-revision provenance is
+included with its checksum.
+
+The report intentionally excludes hostnames and full environment/package dumps.
+The container digest and stack version identify the runtime without adding
+machine-specific noise.
+
+No pass/fail physics tolerances are applied yet. Initial small samples are for
+reviewing the definitions and statistical stability before reference values are
+fixed.
+
+The lightweight contract tests do not require ROOT:
 
 ```bash
-python -m unittest discover -s analysis/benchmarks -p 'test_*.py'
+python3 -m unittest discover -s analysis/benchmarks -p 'test_*.py'
 ```
-
-The initial 100-event samples are intended to validate the extraction and
-metric choices. They are not yet statistically sufficient to define physics
-regression tolerances.

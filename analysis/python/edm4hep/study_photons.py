@@ -19,14 +19,24 @@ histogram, and the eff_E / eff_theta TEfficiency objects; plus reso_vs_E.png,
 reso_vs_theta.png, photon_efficiency_vs_E.png, photon_efficiency_vs_theta.png
 (and per-slice fit PNGs) under --outDir. The per-event photon_tree ntuple is
 written only if --writeTree is given.
+Pass --metrics to write the corresponding compact JSON study sidecar.
 
 Usage:
     python study_photons.py -i reco.edm4hep.root -o histos_photon.root -d plots
 """
 from optparse import OptionParser
 from array import array
+import math
 import os
 import ROOT
+
+from benchmark_metrics import (
+    declare_matching_helpers,
+    finite,
+    fraction,
+    histogram_summary,
+    write_fragment,
+)
 
 #########################
 parser = OptionParser()
@@ -38,7 +48,13 @@ parser.add_option('-d', '--outDir', help='--outDir directory for the .png plots'
                   type=str, default='.')
 parser.add_option('--writeTree', action='store_true', default=False,
                   help='also write the photon_tree ntuple (off by default)')
+parser.add_option('--matchDeltaR', help='maximum truth-to-PFO matching delta-R',
+                  type=float, default=0.1)
+parser.add_option('--metrics', help='optional JSON metrics sidecar', type=str)
 (options, args) = parser.parse_args()
+
+if not math.isfinite(options.matchDeltaR) or options.matchDeltaR <= 0.0:
+    parser.error("--matchDeltaR must be finite and positive")
 
 ROOT.gROOT.SetBatch(True)
 ROOT.EnableImplicitMT()
@@ -64,17 +80,14 @@ arrBins_Eres = array('d', (0., 10., 20., 30., 40., 50., 75., 100.))
 
 # JITted per-event analysis: delta-R matching of PFOs to the truth gun particle.
 # Inputs are whole EDM4hep collections (RVec of POD "...Data" structs).
+declare_matching_helpers(ROOT)
 ROOT.gInterpreter.Declare(r'''
 #include "ROOT/RVec.hxx"
-#include "Math/Vector4D.h"
-#include "Math/VectorUtil.h"
 #include "edm4hep/MCParticleData.h"
 #include "edm4hep/ReconstructedParticleData.h"
 #include <cmath>
 
 using ROOT::VecOps::RVec;
-using ROOT::Math::PxPyPzEVector;
-using ROOT::Math::VectorUtil::DeltaR;
 
 struct PhotonResult {
   double E_truth=0, phi_truth=0, theta_truth=0;
@@ -93,25 +106,24 @@ PhotonResult studyPhoton(const RVec<edm4hep::MCParticleData>& mcs,
   const auto& g = mcs[0];
   const double gE = std::sqrt(g.momentum.x*g.momentum.x + g.momentum.y*g.momentum.y +
                               g.momentum.z*g.momentum.z + g.mass*g.mass);
-  PxPyPzEVector tlv(g.momentum.x, g.momentum.y, g.momentum.z, gE);
   r.E_truth = gE;
-  r.phi_truth = tlv.Phi();
-  r.theta_truth = tlv.Theta();
+  r.phi_truth = std::atan2(g.momentum.y, g.momentum.x);
+  r.theta_truth = std::atan2(std::hypot(g.momentum.x, g.momentum.y), g.momentum.z);
 
   // Matched candidate: the single PFO closest in delta-R to the truth
   r.n_pfos = pfos.size();
   int best = -1;
   double best_dR = 1e9;
   for (size_t i = 0; i < pfos.size(); ++i) {
-    PxPyPzEVector v(pfos[i].momentum.x, pfos[i].momentum.y, pfos[i].momentum.z, pfos[i].energy);
-    double d = DeltaR(v, tlv);
+    double d = MuCollBenchmarks::deltaR(pfos[i].momentum, g.momentum);
     if (d < best_dR) { best_dR = d; best = (int)i; }
   }
   if (best >= 0) {
     const auto& p = pfos[best];
-    PxPyPzEVector v(p.momentum.x, p.momentum.y, p.momentum.z, p.energy);
     r.matched_pdgs.push_back(std::abs(p.PDG));
-    r.Esum = v.E(); r.phi = v.Phi(); r.theta = v.Theta();
+    r.Esum = p.energy;
+    r.phi = std::atan2(p.momentum.y, p.momentum.x);
+    r.theta = std::atan2(std::hypot(p.momentum.x, p.momentum.y), p.momentum.z);
     r.dR_match = best_dR;
   }
 
@@ -152,9 +164,13 @@ nE, nT, nEres = len(arrBins_E) - 1, len(arrBins_theta) - 1, len(arrBins_Eres) - 
 h_truth_E = df.Histo1D(ROOT.RDF.TH1DModel("truth_E", "truth_E", nE, arrBins_E), "E_truth")
 h_truth_theta = df.Histo1D(ROOT.RDF.TH1DModel("truth_theta", "truth_theta", nT, arrBins_theta), "theta_truth")
 
-df_matched = df.Filter("dR_match < 0.1")
+df_matched = df.Filter("dR_match < %.17g" % options.matchDeltaR)
 h_matched_E = df_matched.Histo1D(ROOT.RDF.TH1DModel("matched_E", "matched_E", nE, arrBins_E), "E_truth")
 h_matched_theta = df_matched.Histo1D(ROOT.RDF.TH1DModel("matched_theta", "matched_theta", nT, arrBins_theta), "theta_truth")
+h_matched_response = df_matched.Histo1D(
+    ROOT.RDF.TH1DModel("matched_relative_response", "", 250, -2.5, 2.5), "response")
+h_matched_delta_r = df_matched.Histo1D(
+    ROOT.RDF.TH1DModel("matched_delta_r", "", 100, 0.0, options.matchDeltaR), "dR_match")
 
 h_Npfo = df.Histo1D(ROOT.RDF.TH1DModel("Npfo", "Npfo", 1000, 0, 1000), "Npfo")
 h_pfo_type = df.Histo1D(ROOT.RDF.TH1DModel("pfo_type", "pfo_type", 3000, 0, 3000), "pfo_type_vals")
@@ -164,12 +180,14 @@ h_deltaresponse = df.Histo2D(ROOT.RDF.TH2DModel("delta_response", "delta_respons
 
 # 2D response (true energy vs relative response) used to derive the resolution.
 # Selection mirrors the plotting macro: matched, reconstructed, response > -0.5.
-df_reso = df.Filter("dR_match < 0.1 && E > 0 && response > -0.5")
+df_reso = df.Filter(
+    "dR_match < %.17g && E > 0 && response > -0.5" % options.matchDeltaR)
 h_resp2d = df_reso.Histo2D(ROOT.RDF.TH2DModel("response_vs_Etruth", "response_vs_Etruth", nEres, arrBins_Eres, 250, -2.5, 2.5), "E_truth", "response")
 h_resp_vs_theta = df_reso.Histo2D(ROOT.RDF.TH2DModel("response_vs_theta", "response_vs_theta", nT, arrBins_theta, 250, -2.5, 2.5), "theta_truth", "response")
 
 histos_list = [h_truth_E, h_truth_theta, h_matched_E, h_matched_theta,
-               h_Npfo, h_pfo_type, h_response, h_deltaresponse, h_resp2d, h_resp_vs_theta]
+               h_Npfo, h_pfo_type, h_response, h_deltaresponse, h_resp2d,
+               h_resp_vs_theta, h_matched_response, h_matched_delta_r]
 
 # --- Optional ntuple ---------------------------------------------------------
 # Off by default; pass --writeTree to add it. Snapshot triggers the event loop
@@ -312,3 +330,41 @@ h_reso_theta.Write()
 eff_E.Write()
 eff_theta.Write()
 output_file.Close()
+
+truth_count = int(round(h_truth_E.GetValue().GetEntries()))
+matched_count = int(round(h_matched_E.GetValue().GetEntries()))
+fit_available = h_reso_E.GetN() >= 3
+write_fragment(
+    options.metrics,
+    study="photons",
+    input_path=options.inFile,
+    producer_path=__file__,
+    total_events=truth_count,
+    selected_events=truth_count,
+    configuration={
+        "match_delta_r_max": options.matchDeltaR,
+        "collections": {
+            "truth": "MCParticles",
+            "pfos": "PandoraPFOs",
+            "pfo_collection_present": "PandoraPFOs" in cols,
+        },
+        "energy_bins_gev": list(arrBins_E),
+        "theta_bins_rad": list(arrBins_theta),
+    },
+    metrics={
+        "truth_photons": truth_count,
+        "matched_photons": matched_count,
+        "reconstruction_efficiency": fraction(matched_count, truth_count),
+        "pfo_multiplicity": histogram_summary(h_Npfo.GetValue()),
+        "matched_relative_energy_response": histogram_summary(
+            h_matched_response.GetValue()
+        ),
+        "matched_delta_r": histogram_summary(h_matched_delta_r.GetValue()),
+        "energy_resolution_fit": {
+            "points": int(h_reso_E.GetN()),
+            "stochastic": finite(resoFit.GetParameter(0)) if fit_available else None,
+            "noise": finite(resoFit.GetParameter(1)) if fit_available else None,
+            "constant": finite(resoFit.GetParameter(2)) if fit_available else None,
+        },
+    },
+)

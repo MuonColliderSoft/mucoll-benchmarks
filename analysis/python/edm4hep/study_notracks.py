@@ -23,6 +23,7 @@ Outputs (-o ROOT file): h_mc_theta, h_mc_pt, h_mc_pt_vs_theta, h_seed_counts,
 h_seeds_vs_theta, h_seeds_vs_pt, h_seeds_vs_pt_theta (3D), h_mc_counts. Plots
 under --outDir: notracks_{mc_theta,mc_pt,mc_pt_vs_theta,seed_counts,
 seeds_vs_theta,seeds_vs_pt,mc_counts}.
+Pass --metrics to write the corresponding compact JSON study sidecar.
 
 Usage:
     python study_notracks.py -i reco.edm4hep.root -o histos_notracks.root -d plots
@@ -31,6 +32,8 @@ from optparse import OptionParser
 import os
 import math
 import ROOT
+
+from benchmark_metrics import fraction, histogram_summary, write_fragment
 
 #########################
 parser = OptionParser()
@@ -53,6 +56,7 @@ parser.add_option('--maxSeeds', help='seed count is capped at this value for plo
 parser.add_option('--label', help='provenance label stamped on every plot',
                   type=str, default='Gen3 material handling validation')
 parser.add_option('--suffix', help='plot file format (png, pdf, ...)', type=str, default='png')
+parser.add_option('--metrics', help='optional JSON metrics sidecar', type=str)
 (options, args) = parser.parse_args()
 
 ROOT.gROOT.SetBatch(True)
@@ -236,3 +240,29 @@ out = ROOT.TFile(options.outFile, "RECREATE")
 for h in vals:
     h.Write()
 out.Close()
+
+write_fragment(
+    options.metrics,
+    study="notracks",
+    input_path=options.inFile,
+    producer_path=__file__,
+    total_events=n_total,
+    selected_events=n_empty,
+    configuration={
+        "collections": {
+            "truth": options.mcColl,
+            "tracks": options.trackColl,
+            "track_store": options.trackStore,
+            "seeds": options.seedColl,
+        },
+        "maximum_seed_count": options.maxSeeds,
+        "maximum_truth_pt_gev": options.mcPtMax,
+    },
+    metrics={
+        "events_without_tracks": int(n_empty),
+        "events_without_tracks_fraction": fraction(n_empty, n_total),
+        "accepted_truth_particles": int(round(vals[0].GetEntries())),
+        "truth_particles_per_empty_event": histogram_summary(vals[7]),
+        "seeds_per_empty_event": histogram_summary(vals[3]),
+    },
+)
