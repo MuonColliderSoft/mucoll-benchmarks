@@ -39,6 +39,7 @@ Outputs (-o ROOT file): the seed theta / multiplicity / per-MCP histograms, the
 barrel and endcap layer occupancies (all and unmatched) and the resolutions.
 Plots under --outDir: seeds_theta, seeds_nSeeds, seeds_perMCP, seeds_barrel,
 seeds_endcap, seeds_res_{qpt,d0,z0}.
+Pass --metrics to write the corresponding compact JSON study sidecar.
 
 Usage:
     python study_seeds.py -i reco.edm4hep.root -o histos_seeds.root -d plots
@@ -47,6 +48,8 @@ from optparse import OptionParser
 import os
 import math
 import ROOT
+
+from benchmark_metrics import fraction, histogram_summary, write_fragment
 
 #########################
 parser = OptionParser()
@@ -77,6 +80,7 @@ parser.add_option('--maxSeeds', help='upper edge of the seeds-per-event axis '
 parser.add_option('--label', help='provenance label stamped on every plot',
                   type=str, default='Gen3 material handling validation')
 parser.add_option('--suffix', help='plot file format (png, pdf, ...)', type=str, default='png')
+parser.add_option('--metrics', help='optional JSON metrics sidecar', type=str)
 
 FMAX = 3.4028235e+38
 parser.add_option('--evtPtMin', type=float, default=0.0)
@@ -492,3 +496,47 @@ out = ROOT.TFile(options.outFile, "RECREATE")
 for h in v:
     h.Write()
 out.Close()
+
+write_fragment(
+    options.metrics,
+    study="seeds",
+    input_path=options.inFile,
+    producer_path=__file__,
+    total_events=n_all.GetValue(),
+    selected_events=n_sel.GetValue(),
+    configuration={
+        "collections": {
+            "truth": options.mcColl,
+            "seeds": options.seedColl,
+            "tracker_hits": hit_colls,
+            "sim_tracker_hits": sim_colls,
+        },
+        "magnetic_field_t": options.Bfield,
+        "cell_id_encoding": options.cellIDEncoding,
+        "histogram_binning": {
+            "layers": nL,
+            "seed_multiplicity_max": maxSeeds,
+        },
+        "event_selection": {
+            "pt_gev": [options.evtPtMin, options.evtPtMax],
+            "theta_rad": [options.evtThetaMin, options.evtThetaMax],
+            "abs_eta": [options.evtAbsEtaMin, options.evtAbsEtaMax],
+        },
+    },
+    metrics={
+        "seeds": int(round(n_seeds)),
+        "unmatched_seeds": int(round(n_unm)),
+        "matched_fraction": fraction(n_seeds - n_unm, n_seeds),
+        "seed_multiplicity": histogram_summary(v_nSeeds),
+        "seeds_per_truth_particle": histogram_summary(v_perMCP),
+        "hits_on_seeds": {
+            "barrel": int(round(v_bar.GetEntries())),
+            "endcap": int(round(v_end.GetEntries())),
+        },
+        "resolution": {
+            "relative_q_over_pt": histogram_summary(v_qpt),
+            "d0_mm": histogram_summary(v_d0),
+            "z0_mm": histogram_summary(v_z0),
+        },
+    },
+)
