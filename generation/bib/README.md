@@ -96,3 +96,61 @@ KORIG = 0 - primary beam
        20 - EMS, induced by photons from low-energy neutron
        21 - muons, vector mesons
 ```
+
+## Separate muon BIB production
+
+`split_muon_bib.py` partitions an unrotated, mother-split GEN library into:
+
+- `bulk-norm42`: decay histories without a detector-bound muon, rotated 42 times.
+- `decays-containing-muon-norm1-norot`: complete, unrotated decay histories containing at least one muon.
+- `decays-containing-muon-poisson-norot`: one-entry files containing a Poisson-distributed number of unrotated muon-producing decay histories.
+
+The input library must contain one `events` entry per beam-muon decay history.
+
+First, identify the muon-producing histories:
+
+```bash
+python3 split_muon_bib.py scan \
+  --source /path/to/input/GEN \
+  --output /path/to/output/manifests/partition.json
+```
+
+Create the bulk and unrotated muon components:
+
+```bash
+python3 split_muon_bib.py write-gen \
+  --manifest /path/to/output/manifests/partition.json \
+  --output-root /path/to/output \
+  --polarity MUPLUS
+```
+
+Create the Poisson-grouped muon component:
+
+```bash
+python3 split_muon_bib.py write-muon-groups \
+  --manifest /path/to/output/manifests/partition.json \
+  --output-root /path/to/output \
+  --polarity MUPLUS \
+  --groups 6666
+```
+
+Repeat the production commands for `MUMINUS`.
+
+For the current sample, each grouped file contains
+\(K \sim \mathrm{Poisson}(4.7536)\) muon-producing decay histories, where
+\(4.7536 = 14,218,800 \times 743 / (6,666 \times 200 \times 1,667)\).
+
+Propagate each one-entry `bulk-norm42` and
+`decays-containing-muon-poisson-norot` GEN file through the detector simulation:
+
+```bash
+ddsim \
+  --steeringFile ../../simulation/steer_baseline.py \
+  --numberOfEvents 1 \
+  --inputFiles bib_gen_<index>.edm4hep.root \
+  --outputFile bib_sim_<index>.edm4hep.root
+```
+
+When overlaying the separate muon component, use `bulk-norm42` for the bulk
+BIB. Using an inclusive norm42 library would double-count the muon-producing
+decay histories.
