@@ -157,7 +157,7 @@ for e in range(args.events):
 		n_particles += 1
 	# Writing the event
 	n_events += 1
- 	if n_events % max(1, (args.events + 9) // 10) == 0:
+	if n_events % max(1, (args.events + 9) // 10) == 0:
 		print(f'Wrote event {n_events}/{args.events}')
 	evt.put(cppyy.gbl.std.move(col), "MCParticles")	
 	writer.write_frame(evt, 'events')
