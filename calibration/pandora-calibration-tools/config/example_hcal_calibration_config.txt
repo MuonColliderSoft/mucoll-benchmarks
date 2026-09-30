@@ -1,0 +1,24 @@
+# Example CLI values for scripts/make_hcal_theta_energy_calibration.py
+
+--theta-bins 0,0.35,0.7,1.05,1.4,1.75,2.1,2.45,2.8,3.14159
+--energy-bins 0,5,10,20,50,100,200,500,1000,5000
+--pdg-ids 2112,211,111
+--mc-collection MCParticle
+--energy-source clusters
+--cluster-collection PandoraClusters
+--ecal-subdet-index 0
+--hcal-subdet-index 1
+--skip-missing-subdet-split
+--hcal-fraction-min 0.1
+--energy-basis hadronic
+--ecal-to-had-gev 1.24223718397
+--hcal-to-had-gev 1.01799349172
+--ecal-barrel-collection ECalBarrelCollection
+--ecal-endcap-collection ECalEndcapCollection
+--hcal-barrel-collection HCalBarrelCollection
+--hcal-endcap-collection HCalEndcapCollection
+--ecal-lookup-energy measured
+--hcal-energy-axis measured
+--negative-target-policy skip
+--estimator median
+--min-bin-count 20
