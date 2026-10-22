@@ -28,6 +28,7 @@ AND |eta| windows.
 Outputs (-o ROOT file): the three density histograms, the per-event hit-count
 histograms, and the raw per-layer theta counts. Plots under --outDir:
 hits_{VXD,IT,OT}, hits_combined_hits, hits_total_hits, hits_layer_hits.
+Pass --metrics to write the corresponding compact JSON study sidecar.
 
 Usage:
     python study_hits.py -i reco.edm4hep.root -o histos_hits.root -d plots
@@ -37,6 +38,8 @@ from array import array
 import os
 import math
 import ROOT
+
+from benchmark_metrics import histogram_summary, write_fragment
 
 #########################
 parser = OptionParser()
@@ -55,6 +58,7 @@ parser.add_option('--nThetaBins', help='number of theta bins for the density', t
 parser.add_option('--label', help='provenance label stamped on every plot',
                   type=str, default='Gen3 material handling validation')
 parser.add_option('--suffix', help='plot file format (png, pdf, ...)', type=str, default='png')
+parser.add_option('--metrics', help='optional JSON metrics sidecar', type=str)
 
 FMAX = 3.4028235e+38
 parser.add_option('--evtPtMin', type=float, default=0.0)
@@ -320,3 +324,32 @@ for h in count_vals:
     h.Write()
 total_val.Write()
 out.Close()
+
+write_fragment(
+    options.metrics,
+    study="hits",
+    input_path=options.inFile,
+    producer_path=__file__,
+    total_events=n_all.GetValue(),
+    selected_events=n_sel.GetValue(),
+    configuration={
+        "collections": {"truth": options.mcColl, "tracker_hits": hit_colls},
+        "theta_bins": nTh,
+        "event_selection": {
+            "pt_gev": [options.evtPtMin, options.evtPtMax],
+            "theta_rad": [options.evtThetaMin, options.evtThetaMax],
+            "abs_eta": [options.evtAbsEtaMin, options.evtAbsEtaMax],
+        },
+    },
+    metrics={
+        "hit_multiplicity": {
+            name: {
+                "total_hits": int(round(theta_vals[name].GetEntries())),
+                "per_event": histogram_summary(count_vals[index]),
+                "peak_density_per_sr_per_event": float(density[name].GetMaximum()),
+            }
+            for index, name in enumerate(SUBDET)
+        },
+        "total_hit_multiplicity": histogram_summary(total_val),
+    },
+)

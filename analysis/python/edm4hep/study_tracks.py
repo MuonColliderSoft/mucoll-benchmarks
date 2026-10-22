@@ -63,6 +63,7 @@ eff_theta / fake_rate TEfficiency objects. Plots under --outDir (format set by
 tracks_res_{qpt,d0,z0,all}, tracks_{nHits,nHoles,chi2}, tracks_nTracks. The
 per-object ntuples (truth, tracks, matched, events_summary) are written only
 with --writeTree.
+Pass --metrics to write the corresponding compact JSON study sidecar.
 
 Every plot is stamped with a provenance label, set with --label.
 
@@ -74,6 +75,8 @@ from array import array
 import os
 import math
 import ROOT
+
+from benchmark_metrics import fraction, histogram_summary, write_fragment
 
 #########################
 parser = OptionParser()
@@ -103,6 +106,7 @@ parser.add_option('--writeTree', action='store_true', default=False,
 parser.add_option('--label', help='provenance label stamped on every plot',
                   type=str, default='Gen3 material handling validation')
 parser.add_option('--suffix', help='plot file format (png, pdf, ...)', type=str, default='png')
+parser.add_option('--metrics', help='optional JSON metrics sidecar', type=str)
 
 # --- Event-level selection (port of SelectionConfig.h EventSelectionConfig) ---
 # Keep the event if at least one accepted primary MC particle passes all cuts.
@@ -686,3 +690,63 @@ for h in histos_list:
     h.GetValue().Write()
 eff_pt.Write(); eff_theta.Write(); fake_rate.Write()
 out.Close()
+
+write_fragment(
+    options.metrics,
+    study="tracks",
+    input_path=options.inFile,
+    producer_path=__file__,
+    total_events=n_all.GetValue(),
+    selected_events=n_sel.GetValue(),
+    configuration={
+        "collections": {
+            "truth": options.mcColl,
+            "tracks": options.trackColl,
+            "track_store": options.trackStore,
+            "relations": options.relColl,
+            "uses_full_track_collection": use_all,
+        },
+        "magnetic_field_t": options.Bfield,
+        "histogram_binning": {
+            "pt_gev": [options.ptMin, options.ptMax],
+            "pt_bins": nPt,
+        },
+        "event_selection": {
+            "pt_gev": [options.evtPtMin, options.evtPtMax],
+            "theta_rad": [options.evtThetaMin, options.evtThetaMax],
+            "abs_eta": [options.evtAbsEtaMin, options.evtAbsEtaMax],
+        },
+        "track_selection": {
+            "pt_gev": [options.trkPtMin, options.trkPtMax],
+            "theta_rad": [options.trkThetaMin, options.trkThetaMax],
+            "abs_eta": [options.trkAbsEtaMin, options.trkAbsEtaMax],
+            "phi_rad": [options.trkPhiMin, options.trkPhiMax],
+            "d0_mm": [options.trkD0Min, options.trkD0Max],
+            "z0_mm": [options.trkZ0Min, options.trkZ0Max],
+            "chi2_over_ndof": [options.trkChi2Min, options.trkChi2Max],
+            "minimum_hits": options.trkNHitsMin,
+            "maximum_holes": options.trkNHolesMax,
+        },
+    },
+    metrics={
+        "truth_particles": int(round(n_truth)),
+        "matched_truth_particles": int(round(n_match)),
+        "tracking_efficiency": fraction(n_match, n_truth),
+        "tracks": int(round(n_trk)),
+        "fake_tracks": int(round(n_fake)),
+        "fake_rate": fraction(n_fake, n_trk),
+        "track_multiplicity": histogram_summary(h_nt),
+        "track_quality": {
+            "hits": histogram_summary(hist_vals["allTracks_nHits"]),
+            "holes": histogram_summary(hist_vals["allTracks_nHoles"]),
+            "chi2_over_ndof": histogram_summary(hist_vals["allTracks_chi2ndof"]),
+        },
+        "resolution": {
+            "relative_q_over_pt": histogram_summary(
+                hist_vals["resolutions_q_over_pt"]
+            ),
+            "d0_mm": histogram_summary(hist_vals["resolutions_d0"]),
+            "z0_mm": histogram_summary(hist_vals["resolutions_z0"]),
+        },
+    },
+)
