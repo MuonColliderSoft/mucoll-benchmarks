@@ -22,6 +22,7 @@ parser.add_argument('--pdg', metavar='ID', type=int, default=[13], nargs='+',  h
 parser.add_argument('--dt', metavar='V', type=float, nargs='*', default=0,  help='Time offset [ns]')
 parser.add_argument('--dz', metavar='V', type=float, nargs='*', default=0,  help='Vertex position along Z [mm]')
 parser.add_argument('--d0', metavar='V', type=float, nargs='*', default=0,  help='Vertex position along R [mm]')
+parser.add_argument('--d0AtPCA', action='store_true',  help='Treat --d0 as the signed impact parameter: vertex at the point of closest approach (perpendicular to the momentum), time = |vertex|/c')
 parser.add_argument('--pt', metavar='V', type=float, nargs='*',  help='Tranverse momentum [GeV]')
 parser.add_argument('--p', metavar='V', type=float, nargs='*',  help='Total momentum [GeV]')
 parser.add_argument('--theta', metavar='A', type=float, default=90, nargs='+',  help='Polar angle [deg]')
@@ -98,6 +99,7 @@ if args.comment:
 for name, values in configs.items():
 	header = str(values) if isinstance(values, list) else values
 	frame.put_parameter(name, str(header))
+frame.put_parameter('d0AtPCA', str(args.d0AtPCA))
 # wrt.writeRunHeader(run)
 writer.write_frame(frame, 'header')
 
@@ -136,8 +138,13 @@ for e in range(args.events):
 			pz = p * math.cos(theta)
 		momentum = array('d', [px, py, pz])
 		# Calculating vertex position
-		vx = samples['d0'][s] * math.cos(samples['dphi'][s])
-		vy = samples['d0'][s] * math.sin(samples['dphi'][s])
+		if args.d0AtPCA:
+			# PCA of a track with signed d0 and azimuth phi: it only moves outward from here
+			vx = -samples['d0'][s] * math.sin(phi)
+			vy = samples['d0'][s] * math.cos(phi)
+		else:
+			vx = samples['d0'][s] * math.cos(samples['dphi'][s])
+			vy = samples['d0'][s] * math.sin(samples['dphi'][s])
 		vz = samples['dz'][s]
 		vtx = array('d', [vx, vy, vz])
 		# Assigning properties to the MCParticle
@@ -154,6 +161,9 @@ for e in range(args.events):
 		mcp.getVertex().x = vx
 		mcp.getVertex().y = vy
 		mcp.getVertex().z = vz
+		if args.d0AtPCA:
+			# As if from a parent leaving the IP at t=0 at the speed of light [ns]
+			mcp.setTime(math.sqrt(vx*vx + vy*vy + vz*vz) / 299.792458)
 		# Adding particle to the event
 		n_particles += 1
 	# Writing the event
