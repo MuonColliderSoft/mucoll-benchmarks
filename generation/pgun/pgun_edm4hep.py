@@ -135,9 +135,9 @@ for e in range(args.events):
 			pz = p * math.cos(theta)
 		momentum = array('d', [px, py, pz])
 		# Calculating vertex position
-		vx = samples['d0'][e] / 10.0 * math.cos(samples['dphi'][e])
-		vy = samples['d0'][e] / 10.0 * math.sin(samples['dphi'][e])
-		vz = samples['dz'][e] / 10.0
+		vx = samples['d0'][e] * math.cos(samples['dphi'][e])
+		vy = samples['d0'][e] * math.sin(samples['dphi'][e])
+		vz = samples['dz'][e]
 		vtx = array('d', [vx, vy, vz])
 		# Assigning properties to the MCParticle
 		mcp = col.create()
