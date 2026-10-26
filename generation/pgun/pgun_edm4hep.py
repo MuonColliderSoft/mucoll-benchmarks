@@ -50,8 +50,8 @@ for pdg in args.pdg:
 		raise RuntimeError(f'Particle properties not defined for pdgId: {pdg}')
 
 
-# Generating sampling distributions for each property (1 value/event)
-sample_size = args.events
+# Generating sampling distributions for each property (1 value/particle)
+sample_size = args.events * args.particles
 rng = np.random.default_rng(args.seed)
 samples = {}
 configs = {
@@ -117,21 +117,22 @@ for e in range(args.events):
 	evt.put_parameter("eventNumber", str(e))
 
 	for p in range(args.particles):
+		s = e*args.particles + p
 		pdg_idx = p
 		if choose_random_pdg:
 			pdg_idx = rng.choice(n_pdgs, 1)[0]
 		pdg = args.pdg[pdg_idx]
 		# Calculating all properties for this particle in the event
-		phi = math.radians(samples['phi'][e])
-		theta = math.radians(samples['theta'][e])
+		phi = math.radians(samples['phi'][s])
+		theta = math.radians(samples['theta'][s])
 		# Calculating momentum vector
 		if 'pt' in configs:
-			pt = samples['pt'][e]
+			pt = samples['pt'][s]
 			px = pt * math.cos(phi)
 			py = pt * math.sin(phi)
 			pz = pt / math.tan(theta)
 		elif 'p' in configs:
-			p = samples['p'][e]
+			p = samples['p'][s]
 			px = p * math.cos(phi) * math.sin(theta)
 			py = p * math.sin(phi) * math.sin(theta)
 			pz = p * math.cos(theta)
@@ -139,12 +140,12 @@ for e in range(args.events):
 		# Calculating vertex position
 		if args.d0AtPCA:
 			# PCA of a track with signed d0 and azimuth phi: it only moves outward from here
-			vx = -samples['d0'][e] * math.sin(phi)
-			vy = samples['d0'][e] * math.cos(phi)
+			vx = -samples['d0'][s] * math.sin(phi)
+			vy = samples['d0'][s] * math.cos(phi)
 		else:
-			vx = samples['d0'][e] * math.cos(samples['dphi'][e])
-			vy = samples['d0'][e] * math.sin(samples['dphi'][e])
-		vz = samples['dz'][e]
+			vx = samples['d0'][s] * math.cos(samples['dphi'][s])
+			vy = samples['d0'][s] * math.sin(samples['dphi'][s])
+		vz = samples['dz'][s]
 		vtx = array('d', [vx, vy, vz])
 		# Assigning properties to the MCParticle
 		mcp = col.create()
