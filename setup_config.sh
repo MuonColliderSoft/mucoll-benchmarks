@@ -125,7 +125,7 @@ if [[ "$GEOM_TYPE" != "MAIA" ]]; then
 fi
 
 if [[ "$GEOM_TYPE" == "MAIA" ]]; then
-    MATMAP_PATH="$k4AT_DIR/MAIA_v0_material.json"
+    MATMAP_PATH="$k4AT_DIR/MAIA_v0_gen3_material_map.json"
 else
     MATMAP_PATH="$k4AT_DIR/material-maps.json"
 fi
