@@ -23,6 +23,7 @@ parser.add_argument('--dt', metavar='V', type=float, nargs='*', default=0,  help
 parser.add_argument('--dz', metavar='V', type=float, nargs='*', default=0,  help='Vertex position along Z [mm]')
 parser.add_argument('--d0', metavar='V', type=float, nargs='*', default=0,  help='Vertex position along R [mm]')
 parser.add_argument('--pt', metavar='V', type=float, nargs='*',  help='Tranverse momentum [GeV]')
+parser.add_argument('--log-pt', action='store_true',  help='Sample `--pt min max` flat in log(pT) instead of flat in pT')
 parser.add_argument('--p', metavar='V', type=float, nargs='*',  help='Total momentum [GeV]')
 parser.add_argument('--theta', metavar='A', type=float, default=90, nargs='+',  help='Polar angle [deg]')
 parser.add_argument('--phi', metavar='A', type=float, default=[0, 360], nargs='+',  help='Azimuthal angle [deg]')
@@ -47,6 +48,8 @@ if (args.pt is None and args.p is None) or (args.pt is not None and args.p is no
 for pdg in args.pdg:
 	if pdg not in PDG_PROPS:
 		raise RuntimeError(f'Particle properties not defined for pdgId: {pdg}')
+if args.log_pt and (args.pt is None or len(args.pt) != 2 or not 0 < args.pt[0] < args.pt[1]):
+	raise RuntimeError('--log-pt requires --pt min max with 0 < min < max')
 
 
 # Generating sampling distributions for each property (1 value/particle)
@@ -72,7 +75,11 @@ for name, values in configs.items():
 	elif len(values) == 1:
 		samples[name] = np.ones(sample_size) * values[0]
 	elif len(values) == 2:
-		samples[name] = rng.random(sample_size) * (values[1] - values[0]) + values[0]
+		uniform = rng.random(sample_size)
+		if name == 'pt' and args.log_pt:
+			samples[name] = values[0] * (values[1] / values[0]) ** uniform
+		else:
+			samples[name] = uniform * (values[1] - values[0]) + values[0]
 	elif len(values) == 3:
 		samples[name] = rng.normal(values[1], values[2], sample_size)
 	else:
@@ -95,6 +102,8 @@ frame.put_parameter('particles/event', str(args.particles))
 frame.put_parameter('seed', str(args.seed))
 if args.comment:
 	frame.put_parameter('comment', args.comment)
+if args.log_pt:
+	frame.put_parameter('ptSampling', 'log')
 for name, values in configs.items():
 	header = str(values) if isinstance(values, list) else values
 	frame.put_parameter(name, str(header))
