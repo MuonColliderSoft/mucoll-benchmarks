@@ -40,7 +40,7 @@ python dijetgun_hepmc3.py --flavour b --events 10000 --seed 1 --output dijet_b.h
 | Option | Default | Meaning |
 |---|---|---|
 | `--flavour` | (required) | `b`, `c`, `s`, `u`, `d` or `g` |
-| `--energy EMIN EMAX` | 20 2000 | parton energy range [GeV] |
+| `--energy EMIN EMAX` | 20 5000 | parton energy range [GeV] |
 | `--energy-sampling` | log | `flat` or `log` (flat in log E) |
 | `--angle-sampling` | eta | `eta` (flat in η) or `costheta` |
 | `--theta-min` | 10 | partons in [θ_min, 180° − θ_min] |

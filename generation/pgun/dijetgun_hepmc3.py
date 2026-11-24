@@ -44,7 +44,7 @@ def parse_args(argv=None):
     p.add_argument("--events", type=int, default=1000, help="number of events [%(default)s]")
     p.add_argument("--seed", type=int, default=12345,
                    help="random seed, 1..900000000 [%(default)s]")
-    p.add_argument("--energy", type=float, nargs=2, default=[20., 2000.],
+    p.add_argument("--energy", type=float, nargs=2, default=[20., 5000.],
                    metavar=("EMIN", "EMAX"), help="parton energy range in GeV [%(default)s]")
     p.add_argument("--energy-sampling", choices=["flat", "log"], default="log",
                    help="flat in E or flat in log E [%(default)s]")
