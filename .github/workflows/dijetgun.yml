@@ -1,0 +1,76 @@
+name: Dijet gun
+
+# Runs generation/pgun/dijetgun_hepmc3.py for every flavour in the latest mucoll-sim
+# image and checks the output with check_dijetgun_hepmc3.py. The weekly run catches
+# breakage from new stack images even when the gun itself has not changed.
+
+on:
+  push:
+    branches:
+    - main
+    paths:
+    - generation/pgun/**
+    - .github/workflows/dijetgun.yml
+  pull_request:
+    paths:
+    - generation/pgun/**
+    - .github/workflows/dijetgun.yml
+  schedule:
+  - cron: "0 5 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dijetgun-mucoll-sim-main:
+    runs-on: ubuntu-latest
+    steps:
+      # The stack image does not fit on a default runner disk.
+      - name: Free Disk Space (Ubuntu)
+        uses: endersonmenezes/free-disk-space@v4
+        with:
+          remove_android: true
+          remove_dotnet: true
+          remove_haskell: true
+          remove_tool_cache: true
+          remove_swap: true
+          remove_packages: "azure-cli google-cloud-cli microsoft-edge-stable google-chrome-stable firefox postgresql* temurin-* *llvm* mysql* dotnet-sdk-*"
+          remove_packages_one_command: true
+          remove_folders: "/usr/share/swift /usr/share/miniconda /usr/share/az* /usr/local/lib/node_modules /usr/local/share/chromium /usr/local/share/powershell /usr/local/julia /usr/local/aws-cli /usr/local/aws-sam-cli /usr/share/gradle"
+          rm_cmd: "rmz"  # Use 'rmz' for faster deletion (default: 'rm')
+          rmz_version: "3.1.1"  # Required when rm_cmd is 'rmz'
+          testing: false
+      - uses: actions/checkout@v7
+      # -it keeps the image's entrypoint shell (bash -c "... exec /bin/bash") alive.
+      - name: Launch Container
+        run: |
+          docker run -it --name ci_container -v ${GITHUB_WORKSPACE}:/packages -d ghcr.io/muoncollidersoft/mucoll-sim-ubuntu24:main tail -f /dev/null
+      - name: Get Setup Script
+        run: |
+          SETUP_SCRIPT=$(docker exec ci_container /bin/bash -c "grep setup_mucoll /etc/profile.d/aliases.sh | awk -F '=' '{print \$2}' | sed 's/\"//g'")
+          echo "SETUP_SCRIPT=$SETUP_SCRIPT" >> $GITHUB_ENV
+      - name: Generate and check all flavours
+        run: |
+          echo $SETUP_SCRIPT > ${GITHUB_WORKSPACE}/dijetgun_test.sh
+          cat << 'EOF' >> ${GITHUB_WORKSPACE}/dijetgun_test.sh
+          set -e
+          cd /packages
+          # Images built before MuonColliderSoft/mucoll-spack#119 do not put pythia8 on the path.
+          if ! python -c "import pythia8" 2>/dev/null; then
+            export PYTHONPATH="${PYTHIA8}/lib:${PYTHONPATH}"
+          fi
+          mkdir -p dijetgun_test
+          seed=1
+          for flavour in b c s u d g; do
+            python generation/pgun/dijetgun_hepmc3.py --flavour ${flavour} --events 20 \
+              --seed ${seed} --output dijetgun_test/dijet_${flavour}.hepmc3
+            seed=$((seed + 1))
+          done
+          python generation/pgun/check_dijetgun_hepmc3.py dijetgun_test/*.hepmc3
+          EOF
+
+          chmod +x ${GITHUB_WORKSPACE}/dijetgun_test.sh
+
+          docker exec ci_container /bin/bash -c "/packages/dijetgun_test.sh"
