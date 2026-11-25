@@ -16,7 +16,8 @@ Pythia event record (mimics a real mu+ mu- -> X -> q q~ event):
   4, 5 : hard partons, mother = 3      (status 23)
 
 Particles with c*tau0 > --tau0max (default 10 mm: K0S, Lambda, Sigma, Xi, Omega, ...)
-are left undecayed for Geant4. Beam-spot smearing is left to ddsim (--vertexSigma).
+are left undecayed for Geant4. --vertex-sigma-z shifts each event along z by a Gaussian
+beam-spot offset; otherwise beam-spot smearing is left to ddsim (--vertexSigma).
 
 Needs the pythia8 and pyHepMC3 Python modules from a MuColl stack built with +gen
 (e.g. the mucoll-sim images). Stacks without MuonColliderSoft/mucoll-spack#119 do not
@@ -48,10 +49,13 @@ def parse_args(argv=None):
                    metavar=("EMIN", "EMAX"), help="parton energy range in GeV [%(default)s]")
     p.add_argument("--energy-sampling", choices=["flat", "log"], default="log",
                    help="flat in E or flat in log E [%(default)s]")
-    p.add_argument("--angle-sampling", choices=["eta", "costheta"], default="eta",
-                   help="flat in eta or in cos(theta) [%(default)s]")
+    p.add_argument("--angle-sampling", choices=["eta", "costheta", "theta"], default="eta",
+                   help="flat in eta, cos(theta) or theta [%(default)s]")
     p.add_argument("--theta-min", type=float, default=10.,
                    help="partons in [theta-min, 180 - theta-min] degrees [%(default)s]")
+    p.add_argument("--vertex-sigma-z", type=float, default=0.,
+                   help="Gaussian beam-spot width along z in mm; 0 leaves the vertex at "
+                        "the origin [%(default)s]")
     p.add_argument("--tau0max", type=float, default=10.,
                    help="c*tau0 [mm] above which Geant4 decays particles [%(default)s]")
     p.add_argument("--resonance-id", type=int, default=25,
@@ -68,6 +72,8 @@ def parse_args(argv=None):
         p.error("--seed must be in [1, 900000000]")
     if not 0. < emin <= emax:
         p.error("--energy needs 0 < EMIN <= EMAX")
+    if args.vertex_sigma_z < 0.:
+        p.error("--vertex-sigma-z must not be negative")
     if not 0. < args.theta_min < 90.:
         p.error("--theta-min must be in (0, 90) degrees")
     if not args.overwrite and os.path.exists(args.output):
@@ -79,7 +85,8 @@ def describe(args):
     s = (f"flavour={args.flavour} energy=[{args.energy[0]:g},{args.energy[1]:g}] GeV "
          f"({args.energy_sampling}) theta=[{args.theta_min:g},{180. - args.theta_min:g}] deg "
          f"({args.angle_sampling}) tau0Max={args.tau0max:g} mm "
-         f"resonanceId={args.resonance_id} seed={args.seed}")
+         f"resonanceId={args.resonance_id} vertexSigmaZ={args.vertex_sigma_z:g} mm "
+         f"seed={args.seed}")
     if args.cmnd:
         s += f" cmnd={args.cmnd}"
     return s
@@ -100,6 +107,8 @@ def sample_theta(rndm, args):
         eta_max = -math.log(math.tan(0.5 * theta_min))
         eta = (2. * rndm.flat() - 1.) * eta_max
         return 2. * math.atan(math.exp(-eta))
+    if args.angle_sampling == "theta":
+        return theta_min + rndm.flat() * (math.pi - 2. * theta_min)
     return math.acos((2. * rndm.flat() - 1.) * math.cos(theta_min))
 
 
@@ -164,11 +173,11 @@ def make_pythia(args):
 
 # --- HepMC3 conversion ---------------------------------------------------------------
 
-def to_hepmc(event, hm, run_info):
+def to_hepmc(event, hm, run_info, z0=0.):
     """Convert a Pythia event record into a HepMC3 GenEvent (GeV, mm).
 
     Each particle's production vertex is the end vertex shared by its mothers, placed at
-    the particle's production point. The HepMC status follows Pythia's statusHepMC()
+    the particle's production point, shifted by z0 [mm] along the beam. The HepMC status follows Pythia's statusHepMC()
     (1 final, 2 decayed, 4 beam; other history entries keep Pythia's |status|).
     """
     evt = hm.GenEvent(run_info, hm.Units.GEV, hm.Units.MM)
@@ -192,7 +201,7 @@ def to_hepmc(event, hm, run_info):
         vtx = next((end_vertex[m] for m in mothers if m in end_vertex), None)
         if vtx is None:
             pp = event[i]
-            vtx = hm.GenVertex(hm.FourVector(pp.xProd(), pp.yProd(), pp.zProd(), pp.tProd()))
+            vtx = hm.GenVertex(hm.FourVector(pp.xProd(), pp.yProd(), pp.zProd() + z0, pp.tProd()))
             vertices.append(vtx)
         for m in mothers:
             if m not in end_vertex:
@@ -255,13 +264,15 @@ def main(argv=None):
         if i_event < args.nprint:
             pythia.event.list()
 
-        evt, conflicts = to_hepmc(pythia.event, hm, run_info)
+        z0 = args.vertex_sigma_z * pythia.rndm.gauss() if args.vertex_sigma_z > 0. else 0.
+        evt, conflicts = to_hepmc(pythia.event, hm, run_info, z0)
         n_conflicts += conflicts
         evt.set_event_number(i_event)
         evt.add_attribute("flavour", hm.IntAttribute(flavour))
         evt.add_attribute("parton_energy", hm.DoubleAttribute(energy))
         evt.add_attribute("parton_theta", hm.DoubleAttribute(theta))
         evt.add_attribute("parton_phi", hm.DoubleAttribute(phi))
+        evt.add_attribute("vertex_z", hm.DoubleAttribute(z0))
         writer.write_event(evt)
         n_written += 1
     writer.close()

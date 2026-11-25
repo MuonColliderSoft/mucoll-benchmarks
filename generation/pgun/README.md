@@ -42,7 +42,8 @@ python dijetgun_hepmc3.py --flavour b --events 10000 --seed 1 --output dijet_b.h
 | `--flavour` | (required) | `b`, `c`, `s`, `u`, `d` or `g` |
 | `--energy EMIN EMAX` | 20 5000 | parton energy range [GeV] |
 | `--energy-sampling` | log | `flat` or `log` (flat in log E) |
-| `--angle-sampling` | eta | `eta` (flat in η) or `costheta` |
+| `--angle-sampling` | eta | `eta` (flat in η), `costheta` or `theta` (flat in θ) |
+| `--vertex-sigma-z` | 0 | Gaussian beam-spot width along z [mm]; 0 = no shift |
 | `--theta-min` | 10 | partons in [θ_min, 180° − θ_min] |
 | `--tau0max` | 10 | cτ₀ [mm] above which Geant4, not Pythia, decays the particle |
 | `--cmnd FILE` | – | extra Pythia settings (e.g. a tune), read before init |
@@ -60,7 +61,7 @@ python dijetgun_hepmc3.py --flavour b --events 10000 --seed 1 --output dijet_b.h
 
 - Final-state particles have status 1, and particles decayed by Pythia have status 2.
   The full history is kept, with each vertex at its production point.
-- Per-event attributes: `flavour`, `parton_energy`, `parton_theta`, `parton_phi`.
+- Per-event attributes: `flavour`, `parton_energy`, `parton_theta`, `parton_phi`, `vertex_z`.
 - Run attributes: `generator`, `pythia_version`, `flavour`, `configuration`.
 - Label jets from the partons or the `flavour` attribute, not from the scalar.
   Light-quark and gluon samples also contain heavy flavour from gluon splitting in the shower.
@@ -69,7 +70,8 @@ python dijetgun_hepmc3.py --flavour b --events 10000 --seed 1 --output dijet_b.h
 left to Geant4. Heavy-flavour hadrons and τ are decayed by Pythia, with displaced decay
 vertices in the HepMC record.
 
-**Beam spot**: not applied. Use `ddsim --vertexSigma ...`.
+**Beam spot**: `--vertex-sigma-z` shifts every vertex of an event by one Gaussian offset in z.
+With the default 0, nothing is applied and `ddsim --vertexSigma ...` can do it instead (not both).
 
 **Simulation**:
 
