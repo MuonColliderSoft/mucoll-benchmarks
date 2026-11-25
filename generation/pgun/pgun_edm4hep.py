@@ -25,6 +25,7 @@ parser.add_argument('--d0', metavar='V', type=float, nargs='*', default=0,  help
 parser.add_argument('--d0AtPCA', action='store_true',  help='Treat --d0 as the signed impact parameter: vertex at the point of closest approach (perpendicular to the momentum), time = |vertex|/c')
 parser.add_argument('--pt', metavar='V', type=float, nargs='*',  help='Tranverse momentum [GeV]')
 parser.add_argument('--log-pt', action='store_true',  help='Sample `--pt min max` flat in log(pT) instead of flat in pT')
+parser.add_argument('--p-max', metavar='P', type=float,  help='With --pt: redraw (pT, theta) pairs whose total momentum exceeds P [GeV]')
 parser.add_argument('--p', metavar='V', type=float, nargs='*',  help='Total momentum [GeV]')
 parser.add_argument('--theta', metavar='A', type=float, default=90, nargs='+',  help='Polar angle [deg]')
 parser.add_argument('--phi', metavar='A', type=float, default=[0, 360], nargs='+',  help='Azimuthal angle [deg]')
@@ -51,6 +52,11 @@ for pdg in args.pdg:
 		raise RuntimeError(f'Particle properties not defined for pdgId: {pdg}')
 if args.log_pt and (args.pt is None or len(args.pt) != 2 or not 0 < args.pt[0] < args.pt[1]):
 	raise RuntimeError('--log-pt requires --pt min max with 0 < min < max')
+if args.p_max is not None:
+	if args.pt is None:
+		raise RuntimeError('--p-max requires --pt')
+	if not args.p_max >= min(args.pt):
+		raise RuntimeError('--p-max must be at least the smallest --pt value')
 
 
 # Generating sampling distributions for each property (1 value/particle)
@@ -68,25 +74,39 @@ if args.pt is not None:
 	configs['pt'] = args.pt
 else:
 	configs['p'] = args.p
+def sample(name, values, size):
+	if not isinstance(values, list):
+		return np.ones(size) * values
+	if len(values) == 1:
+		return np.ones(size) * values[0]
+	if len(values) == 2:
+		uniform = rng.random(size)
+		if name == 'pt' and args.log_pt:
+			return values[0] * (values[1] / values[0]) ** uniform
+		return uniform * (values[1] - values[0]) + values[0]
+	if len(values) == 3:
+		return rng.normal(values[1], values[2], size)
+	raise ValueError(
+		f"Invalid number of values for '{name}': expected 1, 2, or 3, but got {len(values)}"
+	)
+
 for name, values in configs.items():
 	if values is None:
 		continue
-	if not isinstance(values, list):
-		samples[name] = np.ones(sample_size) * values
-	elif len(values) == 1:
-		samples[name] = np.ones(sample_size) * values[0]
-	elif len(values) == 2:
-		uniform = rng.random(sample_size)
-		if name == 'pt' and args.log_pt:
-			samples[name] = values[0] * (values[1] / values[0]) ** uniform
-		else:
-			samples[name] = uniform * (values[1] - values[0]) + values[0]
-	elif len(values) == 3:
-		samples[name] = rng.normal(values[1], values[2], sample_size)
-	else:
-		raise ValueError(
-			f"Invalid number of values for '{name}': expected 1, 2, or 3, but got {len(values)}"
-		)
+	samples[name] = sample(name, values, sample_size)
+
+# Rejecting (pT, theta) pairs whose total momentum exceeds --p-max and drawing them again
+if args.p_max is not None:
+	n_rejected = 0
+	while True:
+		above = samples['pt'] / np.abs(np.sin(np.radians(samples['theta']))) > args.p_max
+		n_above = int(np.count_nonzero(above))
+		if n_above == 0:
+			break
+		n_rejected += n_above
+		samples['pt'][above] = sample('pt', configs['pt'], n_above)
+		samples['theta'][above] = sample('theta', configs['theta'], n_above)
+	print(f'Redrew {n_rejected} (pT, theta) pairs above p = {args.p_max:g} GeV')
 		
 # Adding randomised phi angle for d0
 samples['dphi'] = rng.random(sample_size) * math.pi * 2.
@@ -105,6 +125,8 @@ if args.comment:
 	frame.put_parameter('comment', args.comment)
 if args.log_pt:
 	frame.put_parameter('ptSampling', 'log')
+if args.p_max is not None:
+	frame.put_parameter('pMax', str(args.p_max))
 for name, values in configs.items():
 	header = str(values) if isinstance(values, list) else values
 	frame.put_parameter(name, str(header))
